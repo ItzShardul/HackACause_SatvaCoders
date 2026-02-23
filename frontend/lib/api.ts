@@ -42,6 +42,9 @@ export const api = {
     },
     getRoute: (start: [number, number], end: [number, number]) =>
         fetchAPI(`/api/routes/calculate?start_lat=${start[0]}&start_lon=${start[1]}&end_lat=${end[0]}&end_lon=${end[1]}`),
+    dispatchTanker: (data: any) =>
+        fetchAPI("/api/routes/dispatch", { method: "POST", body: JSON.stringify(data) }),
+
 
 
     // Simulation

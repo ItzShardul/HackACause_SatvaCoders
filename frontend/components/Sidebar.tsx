@@ -43,7 +43,7 @@ export default function Sidebar() {
                             fontSize: "0.6rem", color: "var(--text-muted)",
                             letterSpacing: "1px", textTransform: "uppercase",
                         }}>
-                            Drought Warning System
+                            Nagpur District Pilot
                         </div>
                     </div>
                 </div>
@@ -163,14 +163,14 @@ export default function Sidebar() {
                         fontSize: "0.75rem", fontWeight: 700, color: "white",
                         flexShrink: 0,
                     }}>
-                        RS
+                        NA
                     </div>
                     <div>
                         <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                            Rajesh Sharma
+                            Nagpur Admin
                         </div>
                         <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
-                            District Collector
+                            District Collectorate
                         </div>
                     </div>
                 </div>

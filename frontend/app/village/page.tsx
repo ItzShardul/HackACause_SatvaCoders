@@ -9,11 +9,11 @@ import {
 import { api } from "@/lib/api";
 
 const demoVillageData = {
-    name: "Patoda",
-    district: "Beed",
-    taluka: "Patoda",
-    population: 9800,
-    wsi: { score: 88.5, severity: "emergency" },
+    name: "Katol",
+    district: "Nagpur",
+    taluka: "Katol",
+    population: 42100,
+    wsi: { score: 72.5, severity: "critical" },
 };
 
 const SEVERITY_COLORS: Record<string, string> = {

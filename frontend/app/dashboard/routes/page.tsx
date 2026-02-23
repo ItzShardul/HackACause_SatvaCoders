@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, MapPin, Clock, Truck, ChevronRight, Navigation, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { Zap, MapPin, Clock, Truck, ChevronRight, Navigation, Send, CheckCircle2, AlertCircle, Play } from "lucide-react";
 import { api } from "@/lib/api";
 
 // Leaflet
@@ -14,6 +14,40 @@ const Popup = dynamic(() => import("react-leaflet").then(m => m.Popup), { ssr: f
 
 const ROUTE_COLORS = ["#14b8a6", "#3b82f6", "#F59E0B", "#8b5cf6", "#EF4444", "#EC4899"];
 
+// Component for the moving tanker animation
+const MovingTanker = ({ path, color, isVisible }: { path: any[], color: string, isVisible: boolean }) => {
+    const [posIdx, setPosIdx] = useState(0);
+    const [coords, setCoords] = useState<[number, number] | null>(null);
+
+    useEffect(() => {
+        if (!isVisible || path.length === 0) return;
+
+        const interval = setInterval(() => {
+            setPosIdx(prev => (prev + 1) % path.length);
+        }, 100); // Fast enough to look like movement
+
+        return () => clearInterval(interval);
+    }, [path, isVisible]);
+
+    useEffect(() => {
+        if (path.length > 0) {
+            setCoords(path[posIdx]);
+        }
+    }, [posIdx, path]);
+
+    const L = typeof window !== 'undefined' ? require('leaflet') : null;
+    if (!L || !coords || !isVisible) return null;
+
+    const truckIcon = new L.DivIcon({
+        className: 'moving-truck-icon',
+        html: `<div style="background-color: ${color}; width: 20px; height: 20px; border: 3px solid white; border-radius: 4px; box-shadow: 0 0 10px ${color}; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;">🚚</div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+
+    return <Marker position={coords} icon={truckIcon} />;
+};
+
 export default function RoutesPage() {
     const [routesData, setRoutesData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -22,11 +56,13 @@ export default function RoutesPage() {
     const [numVehicles, setNumVehicles] = useState(3);
     const [roadPaths, setRoadPaths] = useState<Record<number, any[]>>({});
     const [selectedTanker, setSelectedTanker] = useState<number | null>(null);
+    const [isSimulating, setIsSimulating] = useState(false);
 
     const optimize = async () => {
         setLoading(true);
         setRoadPaths({});
         setDispatchStatus({});
+        setIsSimulating(false);
         try {
             const data = await api.optimizeRoutes(undefined, numVehicles);
             setRoutesData(data);
@@ -57,6 +93,9 @@ export default function RoutesPage() {
             const res = await api.dispatchTanker(driverData);
             if (res.status === "success") {
                 setDispatchStatus(prev => ({ ...prev, [idx]: "success" }));
+                // Start movement for this specific tanker
+                setSelectedTanker(idx);
+                setIsSimulating(true);
             } else {
                 setDispatchStatus(prev => ({ ...prev, [idx]: "error" }));
             }
@@ -112,10 +151,20 @@ export default function RoutesPage() {
                 <div>
                     <h1>⚡ Nagpur Route Optimizer</h1>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 4 }}>
-                        District-Level VRP Solver & WhatsApp Tanker Dispatch
+                        VRP Dispatching with Real-Time GPS Simulation
                     </p>
                 </div>
                 <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                    <div className="glass-card" style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Simulate:</span>
+                        <button
+                            onClick={() => setIsSimulating(!isSimulating)}
+                            className={`btn ${isSimulating ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ padding: "4px 12px", fontSize: "0.7rem", display: 'flex', alignItems: 'center', gap: 5 }}
+                        >
+                            <Play size={12} fill={isSimulating ? "white" : "none"} /> {isSimulating ? "Moving" : "Paused"}
+                        </button>
+                    </div>
                     <div className="glass-card" style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Nagpur Fleet:</span>
                         <select value={numVehicles} onChange={(e) => setNumVehicles(Number(e.target.value))}
@@ -184,7 +233,7 @@ export default function RoutesPage() {
                                                             display: 'flex', alignItems: 'center', gap: 4, width: '100%'
                                                         }}>
                                                         {dispatching === idx ? <Zap size={10} className="animate-pulse" /> : dispatchStatus[idx] === 'success' ? <CheckCircle2 size={10} /> : dispatchStatus[idx] === 'error' ? <AlertCircle size={10} /> : <Send size={10} />}
-                                                        {dispatching === idx ? "Notifying..." : dispatchStatus[idx] === 'success' ? "Sent" : dispatchStatus[idx] === 'error' ? "Retry" : "Dispatch"}
+                                                        {dispatching === idx ? "Notifying..." : dispatchStatus[idx] === 'success' ? "Dispatched" : dispatchStatus[idx] === 'error' ? "Retry" : "Dispatch"}
                                                     </button>
                                                 </div>
                                             </div>
@@ -194,7 +243,6 @@ export default function RoutesPage() {
                                                     <div key={si} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "0.75rem" }}>
                                                         <div style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem" }}>{si + 1}</div>
                                                         <span style={{ color: "#9ca3af", flex: 1 }}>{stop.village_name}</span>
-                                                        <span style={{ color: "#4b5563" }}>{stop.demand / 1000}k L</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -228,6 +276,16 @@ export default function RoutesPage() {
                             />
                         ))}
 
+                        {/* Animated Tankers */}
+                        {Object.entries(roadPaths).map(([idx, path]) => (
+                            <MovingTanker
+                                key={`moving-${idx}`}
+                                path={path}
+                                color={ROUTE_COLORS[Number(idx)]}
+                                isVisible={isSimulating && (selectedTanker === null || selectedTanker === Number(idx))}
+                            />
+                        ))}
+
                         {routesData?.routes?.map((route: any, idx: number) => (
                             (selectedTanker === null || selectedTanker === idx) && route.stops.map((stop: any, si: number) => (
                                 <Marker key={`${idx}-${si}`} position={[stop.lat, stop.lng]} icon={tankerIcon(ROUTE_COLORS[idx])!}>
@@ -246,7 +304,7 @@ export default function RoutesPage() {
                     <div style={{ position: "absolute", bottom: 20, right: 20, zIndex: 1000 }}>
                         <div className="glass-card" style={{ padding: "8px 12px", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#3b82f6" }}></div>
-                            <span>District-Scale Road Intelligence</span>
+                            <span>District-Scale Road Intelligence Live</span>
                         </div>
                     </div>
                 </div>

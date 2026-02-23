@@ -26,12 +26,12 @@ export default function LoginPage() {
 
     const demoLogin = (demoRole: string) => {
         if (demoRole === "collector") {
-            setEmail("collector@jalmitra.gov.in");
+            setEmail("collector.nagpur@jalmitra.gov.in");
             setPassword("admin123");
             setRole("collector");
             router.push("/dashboard");
         } else {
-            setEmail("gp.patoda@jalmitra.gov.in");
+            setEmail("gp.katol@jalmitra.gov.in");
             setPassword("village123");
             setRole("gram_panchayat");
             router.push("/village");
@@ -61,7 +61,7 @@ export default function LoginPage() {
                             JalMitra
                         </span>
                     </h1>
-                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>Drought Warning & Tanker Management</p>
+                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>Official Nagpur District Smart Pilot</p>
                 </div>
 
                 <form onSubmit={handleLogin}>

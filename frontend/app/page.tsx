@@ -64,7 +64,7 @@ export default function HomePage() {
             background: "rgba(20,184,166,0.1)", border: "1px solid rgba(20,184,166,0.2)",
             fontSize: "0.8rem", color: "#14b8a6"
           }}>
-            <AlertTriangle size={14} /> Drought Prevention Platform for India
+            <AlertTriangle size={14} /> Drought Prevention Platform for Vidarbha, Maharashtra
           </div>
 
           <h1 style={{
@@ -75,11 +75,11 @@ export default function HomePage() {
               Predict Droughts.
             </span>
             <br />
-            <span style={{ color: "#f9fafb" }}>Save Communities.</span>
+            <span style={{ color: "#f9fafb" }}>Save Vidarbha.</span>
           </h1>
 
           <p style={{ fontSize: "1.15rem", color: "#9ca3af", maxWidth: 600, margin: "0 auto 2rem", lineHeight: 1.7 }}>
-            AI-powered drought early warning system with smart tanker allocation.
+            AI-powered drought early warning system specifically designed for the **Vidarbha Region**.
             Transforming crisis response into <strong style={{ color: "#14b8a6" }}>preventive water governance</strong>.
           </p>
 

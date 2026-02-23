@@ -105,7 +105,7 @@ export default function DashboardPage() {
                 <div>
                     <h1>🛰️ Command Center</h1>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 4 }}>
-                        Real-time drought monitoring — Marathwada Region
+                        Real-time drought monitoring — Vidarbha Region
                     </p>
                 </div>
                 <LiveBadge
@@ -155,7 +155,7 @@ export default function DashboardPage() {
                 {[
                     {
                         label: "Total Villages", value: ov.total_villages,
-                        color: "#14b8a6", icon: MapPin, sub: "Marathwada Region",
+                        color: "#14b8a6", icon: MapPin, sub: "Vidarbha Region",
                     },
                     {
                         label: "Avg. Water Stress", value: ov.avg_wsi,

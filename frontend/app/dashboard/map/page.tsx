@@ -16,26 +16,24 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 const demoVillages = [
-    { id: 1, name: "Paithan", district: "Chhatrapati Sambhajinagar", latitude: 19.4767, longitude: 75.385, population: 35207, wsi: { score: 35.2, severity: "watch" } },
-    { id: 2, name: "Beed", district: "Beed", latitude: 18.9891, longitude: 75.7601, population: 45332, wsi: { score: 62.1, severity: "warning" } },
-    { id: 3, name: "Latur", district: "Latur", latitude: 18.3968, longitude: 76.5604, population: 52000, wsi: { score: 45.8, severity: "warning" } },
-    { id: 4, name: "Osmanabad", district: "Dharashiv", latitude: 18.186, longitude: 76.04, population: 41200, wsi: { score: 55.3, severity: "warning" } },
-    { id: 5, name: "Jalna", district: "Jalna", latitude: 19.8347, longitude: 75.8816, population: 38500, wsi: { score: 28.5, severity: "watch" } },
-    { id: 6, name: "Patoda", district: "Beed", latitude: 19.22, longitude: 75.55, population: 9800, wsi: { score: 88.5, severity: "emergency" } },
-    { id: 7, name: "Shirur Kasar", district: "Beed", latitude: 19.31, longitude: 75.93, population: 8500, wsi: { score: 82.1, severity: "critical" } },
-    { id: 8, name: "Kaij", district: "Beed", latitude: 18.85, longitude: 75.98, population: 14500, wsi: { score: 74.2, severity: "critical" } },
-    { id: 9, name: "Wadwani", district: "Beed", latitude: 18.71, longitude: 76.05, population: 7400, wsi: { score: 78.9, severity: "critical" } },
-    { id: 10, name: "Nanded", district: "Nanded", latitude: 19.1383, longitude: 77.321, population: 55000, wsi: { score: 18.3, severity: "normal" } },
-    { id: 11, name: "Hingoli", district: "Hingoli", latitude: 19.715, longitude: 77.15, population: 23000, wsi: { score: 22.7, severity: "watch" } },
-    { id: 12, name: "Parli", district: "Beed", latitude: 18.85, longitude: 76.53, population: 22000, wsi: { score: 67.4, severity: "warning" } },
-    { id: 13, name: "Udgir", district: "Latur", latitude: 18.393, longitude: 77.116, population: 28300, wsi: { score: 42.1, severity: "warning" } },
-    { id: 14, name: "Ambad", district: "Jalna", latitude: 19.61, longitude: 75.95, population: 18200, wsi: { score: 58.3, severity: "warning" } },
-    { id: 15, name: "Nilanga", district: "Latur", latitude: 18.12, longitude: 76.75, population: 24800, wsi: { score: 51.2, severity: "warning" } },
-    { id: 16, name: "Tuljapur", district: "Dharashiv", latitude: 18.01, longitude: 76.07, population: 27600, wsi: { score: 38.9, severity: "watch" } },
-    { id: 17, name: "Sillod", district: "Chhatrapati Sambhajinagar", latitude: 20.3, longitude: 75.65, population: 25300, wsi: { score: 32.4, severity: "watch" } },
-    { id: 18, name: "Ashti", district: "Beed", latitude: 18.99, longitude: 76.17, population: 12300, wsi: { score: 69.8, severity: "warning" } },
-    { id: 19, name: "Dharur", district: "Beed", latitude: 18.82, longitude: 76.28, population: 11100, wsi: { score: 65.4, severity: "warning" } },
-    { id: 20, name: "Soygaon", district: "Chhatrapati Sambhajinagar", latitude: 20.47, longitude: 75.41, population: 7200, wsi: { score: 72.7, severity: "critical" } },
+    { id: 1, name: "Yavatmal", district: "Yavatmal", latitude: 20.3888, longitude: 78.1204, population: 120000, wsi: { score: 78.5, severity: "critical" } },
+    { id: 2, name: "Pusad", district: "Yavatmal", latitude: 19.9146, longitude: 77.5724, population: 52000, wsi: { score: 85.2, severity: "emergency" } },
+    { id: 3, name: "Washim", district: "Washim", latitude: 20.1108, longitude: 77.1330, population: 58000, wsi: { score: 62.1, severity: "warning" } },
+    { id: 4, name: "Akola", district: "Akola", latitude: 20.7096, longitude: 77.0075, population: 140000, wsi: { score: 45.8, severity: "warning" } },
+    { id: 5, name: "Buldhana", district: "Buldhana", latitude: 20.5293, longitude: 76.1852, population: 62000, wsi: { score: 55.3, severity: "warning" } },
+    { id: 6, name: "Risod", district: "Washim", latitude: 20.1008, longitude: 76.7666, population: 22000, wsi: { score: 88.5, severity: "emergency" } },
+    { id: 7, name: "Akot", district: "Akola", latitude: 21.0981, longitude: 77.0536, population: 45000, wsi: { score: 82.1, severity: "critical" } },
+    { id: 8, name: "Darwha", district: "Yavatmal", latitude: 20.3218, longitude: 77.7696, population: 31000, wsi: { score: 74.2, severity: "critical" } },
+    { id: 9, name: "Wani", district: "Yavatmal", latitude: 20.0570, longitude: 78.9580, population: 38000, wsi: { score: 78.9, severity: "critical" } },
+    { id: 10, name: "Nagpur", district: "Nagpur", latitude: 21.1458, longitude: 79.0882, population: 250000, wsi: { score: 18.3, severity: "normal" } },
+    { id: 11, name: "Wardha", district: "Wardha", latitude: 20.7453, longitude: 78.6022, population: 55000, wsi: { score: 22.7, severity: "watch" } },
+    { id: 12, name: "Digras", district: "Yavatmal", latitude: 20.1068, longitude: 77.7180, population: 28000, wsi: { score: 67.4, severity: "warning" } },
+    { id: 13, name: "Achalpur", district: "Amravati", latitude: 21.2572, longitude: 77.5097, population: 68000, wsi: { score: 42.1, severity: "warning" } },
+    { id: 14, name: "Amravati", district: "Amravati", latitude: 20.9320, longitude: 77.7523, population: 175000, wsi: { score: 58.3, severity: "warning" } },
+    { id: 15, name: "Chandrapur", district: "Chandrapur", latitude: 19.9615, longitude: 79.2961, population: 95000, wsi: { score: 15.2, severity: "normal" } },
+    { id: 16, name: "Bhandara", district: "Bhandara", latitude: 21.1667, longitude: 79.6500, population: 48000, wsi: { score: 12.5, severity: "normal" } },
+    { id: 17, name: "Gondia", district: "Gondia", latitude: 21.4631, longitude: 80.1953, population: 42000, wsi: { score: 10.4, severity: "normal" } },
+    { id: 18, name: "Gadchiroli", district: "Gadchiroli", latitude: 20.1809, longitude: 80.0005, population: 28000, wsi: { score: 32.4, severity: "watch" } },
 ];
 
 export default function DroughtMapPage() {
@@ -57,7 +55,7 @@ export default function DroughtMapPage() {
                 <div>
                     <h1>🗺️ Drought Severity Map</h1>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 4 }}>
-                        Village-level Water Stress Index heatmap — Marathwada Region
+                        Village-level Water Stress Index heatmap — Vidarbha Region
                     </p>
                 </div>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -83,7 +81,7 @@ export default function DroughtMapPage() {
                     style={{ height: "calc(100vh - 200px)", overflow: "hidden" }}
                 >
                     <MapContainer
-                        center={[19.2, 76.2]}
+                        center={[20.5, 78.5]}
                         zoom={8}
                         style={{ height: "100%", width: "100%" }}
                         scrollWheelZoom={true}

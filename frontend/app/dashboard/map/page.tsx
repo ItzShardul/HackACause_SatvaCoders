@@ -9,6 +9,7 @@ const MapContainer = dynamic(() => import("react-leaflet").then(m => m.MapContai
 const TileLayer = dynamic(() => import("react-leaflet").then(m => m.TileLayer), { ssr: false });
 const CircleMarker = dynamic(() => import("react-leaflet").then(m => m.CircleMarker), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then(m => m.Popup), { ssr: false });
+const GeoJSON = dynamic(() => import("react-leaflet").then(m => m.GeoJSON), { ssr: false });
 
 const SEVERITY_COLORS: Record<string, string> = {
     normal: "#10B981", watch: "#F59E0B", warning: "#F97316",
@@ -40,11 +41,19 @@ export default function DroughtMapPage() {
     const [villages, setVillages] = useState<any[]>(demoVillages);
     const [selected, setSelected] = useState<any>(null);
     const [filter, setFilter] = useState<string>("all");
+    const [boundaryData, setBoundaryData] = useState<any>(null);
 
     useEffect(() => {
+        // Fetch villages
         api.getVillages().then(data => {
             if (data?.length) setVillages(data);
         }).catch(() => { });
+
+        // Fetch Vidarbha boundary GeoJSON
+        fetch("/vidarbha.geojson")
+            .then(res => res.json())
+            .then(data => setBoundaryData(data))
+            .catch(err => console.error("Error loading boundary:", err));
     }, []);
 
     const filtered = filter === "all" ? villages : villages.filter((v: any) => v.wsi?.severity === filter);
@@ -82,7 +91,7 @@ export default function DroughtMapPage() {
                 >
                     <MapContainer
                         center={[20.5, 78.5]}
-                        zoom={8}
+                        zoom={7.5}
                         style={{ height: "100%", width: "100%" }}
                         scrollWheelZoom={true}
                     >
@@ -90,6 +99,21 @@ export default function DroughtMapPage() {
                             attribution='&copy; <a href="https://carto.com">CARTO</a>'
                             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                         />
+
+                        {/* Vidarbha Boundary Layer */}
+                        {boundaryData && (
+                            <GeoJSON
+                                data={boundaryData}
+                                style={{
+                                    color: "#3b82f6",
+                                    weight: 3,
+                                    fillColor: "#3b82f6",
+                                    fillOpacity: 0.05,
+                                    dashArray: "5, 10"
+                                }}
+                            />
+                        )}
+
                         {filtered.map((v: any) => {
                             const sev = v.wsi?.severity || "unknown";
                             const score = v.wsi?.score || 0;
@@ -142,6 +166,11 @@ export default function DroughtMapPage() {
                                 </span>
                             </div>
                         ))}
+                        <div style={{ height: "1px", background: "var(--border)", margin: "10px 0" }} />
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ width: 12, height: 2, background: "#3b82f6", border: "1px dashed #3b82f6" }} />
+                            <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Vidarbha Boundary</span>
+                        </div>
                     </div>
 
                     {/* Stats */}
@@ -150,7 +179,7 @@ export default function DroughtMapPage() {
                         <div style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                                 <span>Total on map</span>
-                                <span style={{ fontWeight: 700, color: "#f9fafb" }}>{filtered.length}</span>
+                                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{filtered.length}</span>
                             </div>
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                                 <span>Emergency</span>

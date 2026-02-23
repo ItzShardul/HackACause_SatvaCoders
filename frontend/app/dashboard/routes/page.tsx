@@ -45,10 +45,9 @@ export default function RoutesPage() {
     const handleDispatch = async (route: any, idx: number) => {
         setDispatching(idx);
         try {
-            // Mock driver data (in production this would come from the Tanker model)
             const driverData = {
                 driver_name: `Driver ${idx + 1}`,
-                driver_phone: "8459468626", // Replace with your test number if needed
+                driver_phone: "8459468626",
                 village_name: route.stops[0].village_name,
                 depot: routesData.depot,
                 stops: route.stops,
@@ -111,21 +110,21 @@ export default function RoutesPage() {
         <div style={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column" }}>
             <div className="page-header" style={{ marginBottom: 0, borderBottom: "none" }}>
                 <div>
-                    <h1>⚡ Smart Route Optimizer</h1>
+                    <h1>⚡ Nagpur Route Optimizer</h1>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 4 }}>
-                        Multi-stop VRP Solver & WhatsApp Driver Dispatch System
+                        District-Level VRP Solver & WhatsApp Tanker Dispatch
                     </p>
                 </div>
                 <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
                     <div className="glass-card" style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Fleet:</span>
+                        <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Nagpur Fleet:</span>
                         <select value={numVehicles} onChange={(e) => setNumVehicles(Number(e.target.value))}
                             style={{ background: "transparent", border: "none", color: "#f9fafb", fontSize: "0.85rem", outline: "none", fontWeight: 700 }}>
                             {[2, 3, 4, 5, 8].map(n => <option key={n} value={n} style={{ background: "#111827" }}>{n} Tankers</option>)}
                         </select>
                     </div>
                     <button className="btn btn-primary" onClick={optimize} disabled={loading} style={{ minWidth: 160 }}>
-                        <Zap size={16} fill={loading ? "white" : "none"} /> {loading ? "Computing..." : "Optimize Routes"}
+                        <Zap size={16} fill={loading ? "white" : "none"} /> {loading ? "Optimizing..." : "Optimize Routes"}
                     </button>
                 </div>
             </div>
@@ -138,17 +137,17 @@ export default function RoutesPage() {
                             <>
                                 <motion.div className="stat-card" style={{ padding: "1rem" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                                        <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Current Load</span>
-                                        <span className="badge badge-normal">Optimized</span>
+                                        <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Pilot Logistics</span>
+                                        <span className="badge badge-normal">Nagpur Pilot</span>
                                     </div>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                                         <div>
                                             <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent-teal)" }}>{routesData.total_distance_km}km</div>
-                                            <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Total Distance</div>
+                                            <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Total Travel</div>
                                         </div>
                                         <div>
                                             <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent-blue)" }}>{routesData.num_villages_served}</div>
-                                            <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Villages Served</div>
+                                            <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Villages Reached</div>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -185,7 +184,7 @@ export default function RoutesPage() {
                                                             display: 'flex', alignItems: 'center', gap: 4, width: '100%'
                                                         }}>
                                                         {dispatching === idx ? <Zap size={10} className="animate-pulse" /> : dispatchStatus[idx] === 'success' ? <CheckCircle2 size={10} /> : dispatchStatus[idx] === 'error' ? <AlertCircle size={10} /> : <Send size={10} />}
-                                                        {dispatching === idx ? "Sending..." : dispatchStatus[idx] === 'success' ? "Dispatched" : dispatchStatus[idx] === 'error' ? "Failed" : "Send WhatsApp"}
+                                                        {dispatching === idx ? "Notifying..." : dispatchStatus[idx] === 'success' ? "Sent" : dispatchStatus[idx] === 'error' ? "Retry" : "Dispatch"}
                                                     </button>
                                                 </div>
                                             </div>
@@ -206,7 +205,7 @@ export default function RoutesPage() {
                         ) : (
                             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#4b5563" }}>
                                 <Navigation size={40} style={{ margin: "0 auto 1rem", opacity: 0.2 }} />
-                                <p style={{ fontSize: "0.9rem" }}>Optimize routes to see dispatch options.</p>
+                                <p style={{ fontSize: "0.9rem" }}>Optimize Nagpur routes to start dispatch.</p>
                             </div>
                         )}
                     </AnimatePresence>
@@ -214,10 +213,10 @@ export default function RoutesPage() {
 
                 {/* Map View */}
                 <div className="glass-card" style={{ position: "relative", overflow: "hidden" }}>
-                    <MapContainer center={[20.5, 78.5]} zoom={8} style={{ height: "100%", width: "100%" }}>
+                    <MapContainer center={[21.1458, 79.0882]} zoom={10} style={{ height: "100%", width: "100%" }}>
                         <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
 
-                        {L && <Marker position={[21.1458, 79.0882]} icon={depotIcon!}><Popup>Main Depot (Nagpur)</Popup></Marker>}
+                        {L && <Marker position={[21.1458, 79.0882]} icon={depotIcon!}><Popup>Main Nagpur Depot</Popup></Marker>}
 
                         {Object.entries(roadPaths).map(([idx, path]) => (
                             <Polyline
@@ -247,7 +246,7 @@ export default function RoutesPage() {
                     <div style={{ position: "absolute", bottom: 20, right: 20, zIndex: 1000 }}>
                         <div className="glass-card" style={{ padding: "8px 12px", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#3b82f6" }}></div>
-                            <span>Active Road Intelligence Active</span>
+                            <span>District-Scale Road Intelligence</span>
                         </div>
                     </div>
                 </div>

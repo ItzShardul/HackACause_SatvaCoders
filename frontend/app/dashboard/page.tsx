@@ -21,22 +21,22 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 // Fallback demo data (used only when backend is unreachable)
 const demoOverview = {
-    total_villages: 50, avg_wsi: 48.3,
-    severity_distribution: { normal: 8, watch: 12, warning: 15, critical: 10, emergency: 5 },
-    critical_villages: 15, affected_population: 285000,
-    tankers: { total: 20, available: 8, on_trip: 5, maintenance: 2 },
-    trips_today: 12, delivered_today: 7, pending_requests: 15, open_grievances: 8,
+    total_villages: 50, avg_wsi: 54.2,
+    severity_distribution: { normal: 5, watch: 10, warning: 18, critical: 12, emergency: 5 },
+    critical_villages: 17, affected_population: 142000,
+    tankers: { total: 15, available: 6, on_trip: 7, maintenance: 2 },
+    trips_today: 14, delivered_today: 9, pending_requests: 12, open_grievances: 6,
 };
 
 const demoPriorities = [
-    { village_name: "Patoda", district: "Beed", priority_score: 92.3, wsi_score: 88.5, severity: "emergency", population: 9800, days_since_last_supply: 18, pending_requests: 3 },
-    { village_name: "Shirur Kasar", district: "Beed", priority_score: 87.1, wsi_score: 82.1, severity: "critical", population: 8500, days_since_last_supply: 15, pending_requests: 2 },
-    { village_name: "Wadwani", district: "Beed", priority_score: 83.5, wsi_score: 78.9, severity: "critical", population: 7400, days_since_last_supply: 12, pending_requests: 2 },
-    { village_name: "Kaij", district: "Beed", priority_score: 79.2, wsi_score: 74.2, severity: "critical", population: 14500, days_since_last_supply: 10, pending_requests: 1 },
-    { village_name: "Ashti", district: "Beed", priority_score: 75.6, wsi_score: 69.8, severity: "warning", population: 12300, days_since_last_supply: 8, pending_requests: 1 },
-    { village_name: "Dharur", district: "Beed", priority_score: 72.1, wsi_score: 65.4, severity: "warning", population: 11100, days_since_last_supply: 14, pending_requests: 1 },
-    { village_name: "Soygaon", district: "C.S.Nagar", priority_score: 68.9, wsi_score: 62.7, severity: "warning", population: 7200, days_since_last_supply: 20, pending_requests: 0 },
-    { village_name: "Ambad", district: "Jalna", priority_score: 65.3, wsi_score: 58.3, severity: "warning", population: 18200, days_since_last_supply: 7, pending_requests: 1 },
+    { village_name: "Bhiwapur", district: "Nagpur", priority_score: 92.1, wsi_score: 91.5, severity: "emergency", population: 14200, days_since_last_supply: 21, pending_requests: 4 },
+    { village_name: "Narkhed", district: "Nagpur", priority_score: 88.5, wsi_score: 87.2, severity: "critical", population: 21500, days_since_last_supply: 18, pending_requests: 3 },
+    { village_name: "Katol", district: "Nagpur", priority_score: 82.3, wsi_score: 78.4, severity: "critical", population: 42100, days_since_last_supply: 14, pending_requests: 2 },
+    { village_name: "Umred", district: "Nagpur", priority_score: 79.8, wsi_score: 75.1, severity: "critical", population: 45600, days_since_last_supply: 12, pending_requests: 1 },
+    { village_name: "Parseoni", district: "Nagpur", priority_score: 75.6, wsi_score: 72.4, severity: "critical", population: 15300, days_since_last_supply: 15, pending_requests: 2 },
+    { village_name: "Kuhi", district: "Nagpur", priority_score: 72.1, wsi_score: 64.2, severity: "warning", population: 11200, days_since_last_supply: 9, pending_requests: 1 },
+    { village_name: "Kamptee", district: "Nagpur", priority_score: 55.4, wsi_score: 45.2, severity: "warning", population: 84300, days_since_last_supply: 7, pending_requests: 0 },
+    { village_name: "Savner", district: "Nagpur", priority_score: 52.1, wsi_score: 55.3, severity: "warning", population: 31200, days_since_last_supply: 10, pending_requests: 1 },
 ];
 
 const demoRainfall = [
@@ -60,7 +60,7 @@ const demoGroundwater = [
 const fadeInUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
 
 export default function DashboardPage() {
-    // ── Real-time overview polling every 15 seconds ──
+    // ── Real-time overview polling ──
     const overviewFetcher = useCallback(async () => {
         const data = await api.getDashboardOverview();
         return data;
@@ -74,16 +74,15 @@ export default function DashboardPage() {
         refresh: refreshOverview,
     } = usePolling(overviewFetcher, 15000, demoOverview);
 
-    // ── Priority table polling every 20 seconds ──
+    // ── Priority table polling ──
     const priorityFetcher = useCallback(() => api.getPriorities(8), []);
     const { data: priorities, refresh: refreshPriorities } = usePolling(
         priorityFetcher, 20000, demoPriorities
     );
 
-    // ── WebSocket for instant push events ──
-    const { connected, events, lastEvent } = useWebSocket();
+    // ── WebSocket ──
+    const { connected, lastEvent } = useWebSocket();
 
-    // Refresh everything manually
     const refreshAll = useCallback(() => {
         refreshOverview();
         refreshPriorities();
@@ -100,12 +99,12 @@ export default function DashboardPage() {
 
     return (
         <div>
-            {/* ── Header ── */}
+            {/* Header */}
             <div className="page-header">
                 <div>
-                    <h1>🛰️ Command Center</h1>
+                    <h1>🛰️ Nagpur Command Center</h1>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 4 }}>
-                        Real-time drought monitoring — Vidarbha Region
+                        Official Smart Pilot — Nagpur District Water Management
                     </p>
                 </div>
                 <LiveBadge
@@ -117,60 +116,36 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* ── Live event notifications (from WebSocket) ── */}
-            <AnimatePresence>
-                {lastEvent && lastEvent.type !== "connected" && (
-                    <motion.div
-                        key={lastEvent.timestamp}
-                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        animate={{ opacity: 1, height: "auto", marginBottom: "1rem" }}
-                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                        style={{
-                            background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)",
-                            borderRadius: 10, padding: "10px 16px", fontSize: "0.82rem",
-                            display: "flex", alignItems: "center", gap: 10,
-                            color: "#a78bfa",
-                        }}
-                    >
-                        <Bell size={14} />
-                        <strong>Live Event:</strong> {lastEvent.type.replace(/_/g, " ")} —{" "}
-                        {JSON.stringify(lastEvent.data).slice(0, 100)}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* ── Alert Ticker ── */}
+            {/* Alert Ticker */}
             <div className="alert-ticker">
                 <span className="ticker-dot" />
                 <AlertTriangle size={16} color="#EF4444" />
                 <span style={{ color: "#fca5a5" }}>
-                    <strong>ALERT:</strong> {ov.critical_villages} villages at Critical/Emergency ·{" "}
-                    {(ov.affected_population || 0).toLocaleString()} people affected ·{" "}
-                    {ov.pending_requests} pending requests
+                    <strong>PILOT ALERT:</strong> {ov.critical_villages} Nagpur villages at Emergency status · {(ov.affected_population || 0).toLocaleString()} people needing immediate supply.
                 </span>
             </div>
 
-            {/* ── Stats Grid ── */}
+            {/* Stats Grid */}
             <div className="stats-grid">
                 {[
                     {
-                        label: "Total Villages", value: ov.total_villages,
-                        color: "#14b8a6", icon: MapPin, sub: "Vidarbha Region",
+                        label: "Monitored Villages", value: ov.total_villages,
+                        color: "#14b8a6", icon: MapPin, sub: "Nagpur District",
                     },
                     {
                         label: "Avg. Water Stress", value: ov.avg_wsi,
-                        color: (ov.avg_wsi || 0) > 60 ? "#EF4444" : (ov.avg_wsi || 0) > 40 ? "#F59E0B" : "#10B981",
-                        icon: Droplets, sub: "+5.2 from last month",
+                        color: (ov.avg_wsi || 0) > 60 ? "#EF4444" : "#F59E0B",
+                        icon: Droplets, sub: "Increasing in Katol Sector",
                     },
                     {
-                        label: "Critical Villages", value: ov.critical_villages,
+                        label: "Emergency Sites", value: ov.critical_villages,
                         color: "#EF4444", icon: AlertTriangle,
-                        sub: `${(ov.affected_population || 0).toLocaleString()} affected`,
+                        sub: `${(ov.affected_population || 0).toLocaleString()} pop. affected`,
                     },
                     {
-                        label: "Tankers On Trip", value: `${ov.tankers?.on_trip ?? 0}/${ov.tankers?.total ?? 0}`,
+                        label: "Tankers Active", value: `${ov.tankers?.on_trip ?? 0}/${ov.tankers?.total ?? 0}`,
                         color: "#3b82f6", icon: Truck,
-                        sub: `${ov.delivered_today ?? 0} delivered today`,
+                        sub: "Optimization level: HIGH",
                     },
                 ].map((s, i) => (
                     <motion.div key={s.label} className="stat-card" {...fadeInUp} transition={{ delay: i * 0.05 }}>
@@ -184,152 +159,119 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            {/* ── Charts Row ── */}
+            {/* Charts Row */}
             <div className="dashboard-grid">
-                {/* Rainfall */}
                 <motion.div className="glass-card" {...fadeInUp} transition={{ delay: 0.2 }}>
-                    <div className="section-title">📉 Rainfall vs Normal (mm)</div>
+                    <div className="section-title">📉 Rainfall Deviation (Nagpur)</div>
                     <div style={{ padding: "1rem", height: 270 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={demoRainfall}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(75,85,99,0.3)" />
                                 <XAxis dataKey="month" tick={{ fill: "#9ca3af", fontSize: 11 }} />
                                 <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
-                                <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: 8, fontSize: 12 }} />
-                                <Area type="monotone" dataKey="normal" stroke="#3b82f6" fill="rgba(59,130,246,0.12)" name="Normal (mm)" />
-                                <Area type="monotone" dataKey="actual" stroke="#14b8a6" fill="rgba(20,184,166,0.18)" name="Actual (mm)" />
-                                <Legend wrapperStyle={{ fontSize: 11, color: "#9ca3af" }} />
+                                <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151" }} />
+                                <Area type="monotone" dataKey="normal" stroke="#3b82f6" fill="rgba(59,130,246,0.1)" />
+                                <Area type="monotone" dataKey="actual" stroke="#14b8a6" fill="rgba(20,184,166,0.2)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </motion.div>
 
-                {/* Severity Pie */}
                 <motion.div className="glass-card" {...fadeInUp} transition={{ delay: 0.25 }}>
                     <div className="section-title">🎯 Severity Distribution</div>
                     <div style={{ padding: "1rem", height: 270, display: "flex", alignItems: "center" }}>
                         <ResponsiveContainer width="50%" height="100%">
                             <PieChart>
-                                <Pie data={severityData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value">
+                                <Pie data={severityData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
                                     {severityData.map((e, i) => <Cell key={i} fill={e.fill} />)}
                                 </Pie>
-                                <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: 8, fontSize: 12 }} />
+                                <Tooltip />
                             </PieChart>
                         </ResponsiveContainer>
-                        <div style={{ flex: 1, paddingLeft: "0.5rem" }}>
+                        <div style={{ flex: 1, paddingLeft: "1rem" }}>
                             {severityData.map((e) => (
-                                <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 9 }}>
-                                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: e.fill }} />
-                                    <span style={{ fontSize: "0.78rem", color: "#9ca3af", flex: 1 }}>{e.name}</span>
-                                    <span style={{ fontSize: "0.88rem", fontWeight: 700 }}>{e.value}</span>
+                                <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: e.fill }} />
+                                    <span style={{ fontSize: "0.75rem", color: "#9ca3af", flex: 1 }}>{e.name}</span>
+                                    <span style={{ fontSize: "0.85rem", fontWeight: 700 }}>{e.value}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </motion.div>
 
-                {/* Groundwater */}
                 <motion.div className="glass-card" {...fadeInUp} transition={{ delay: 0.3 }}>
-                    <div className="section-title">💧 Groundwater Depth (m below surface)</div>
+                    <div className="section-title">💧 Groundwater Deficit</div>
                     <div style={{ padding: "1rem", height: 270 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={demoGroundwater}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(75,85,99,0.3)" />
                                 <XAxis dataKey="month" tick={{ fill: "#9ca3af", fontSize: 11 }} />
                                 <YAxis reversed tick={{ fill: "#9ca3af", fontSize: 11 }} domain={[6, 16]} />
-                                <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: 8, fontSize: 12 }} />
-                                <Area type="monotone" dataKey="level" stroke="#F59E0B" fill="rgba(245,158,11,0.12)" name="Depth (m)" />
+                                <Tooltip />
+                                <Area type="monotone" dataKey="level" stroke="#F59E0B" fill="rgba(245,158,11,0.1)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </motion.div>
 
-                {/* Fleet status */}
                 <motion.div className="glass-card" {...fadeInUp} transition={{ delay: 0.35 }}>
-                    <div className="section-title">🚛 Fleet Status</div>
+                    <div className="section-title">🚛 Tanker Fleet Status</div>
                     <div style={{ padding: "1.5rem" }}>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                             {[
-                                { label: "Available", value: ov.tankers?.available ?? 0, color: "#10B981", icon: CheckCircle },
-                                { label: "On Trip", value: ov.tankers?.on_trip ?? 0, color: "#3b82f6", icon: Truck },
-                                { label: "Maintenance", value: ov.tankers?.maintenance ?? 0, color: "#F59E0B", icon: XCircle },
-                                { label: "Total Fleet", value: ov.tankers?.total ?? 0, color: "#8b5cf6", icon: Activity },
+                                { label: "Ready", value: ov.tankers?.available ?? 0, color: "#10B981", icon: CheckCircle },
+                                { label: "In Transit", value: ov.tankers?.on_trip ?? 0, color: "#3b82f6", icon: Truck },
+                                { label: "Service", value: ov.tankers?.maintenance ?? 0, color: "#F59E0B", icon: XCircle },
+                                { label: "Nagpur Fleet", value: ov.tankers?.total ?? 0, color: "#8b5cf6", icon: Activity },
                             ].map((item) => (
-                                <div key={item.label} style={{
-                                    background: "var(--glass)", borderRadius: 12, padding: "1.1rem",
-                                    border: "1px solid var(--border-light)", textAlign: "center",
-                                }}>
-                                    <item.icon size={18} color={item.color} style={{ marginBottom: 8 }} />
-                                    <div style={{ fontSize: "1.6rem", fontWeight: 800, color: item.color }}>{item.value}</div>
-                                    <div style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: 4 }}>{item.label}</div>
+                                <div key={item.label} style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: "1rem", textAlign: "center", border: "1px solid var(--border-light)" }}>
+                                    <div style={{ fontSize: "1.4rem", fontWeight: 800, color: item.color }}>{item.value}</div>
+                                    <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>{item.label}</div>
                                 </div>
                             ))}
-                        </div>
-                        <div style={{ marginTop: "1.25rem" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "#9ca3af", marginBottom: 5 }}>
-                                <span>Fleet Utilization</span>
-                                <span>{Math.round(((ov.tankers?.on_trip ?? 0) / (ov.tankers?.total || 1)) * 100)}%</span>
-                            </div>
-                            <div style={{ background: "var(--border)", borderRadius: 4, height: 8 }}>
-                                <div style={{
-                                    height: "100%", borderRadius: 4,
-                                    background: "linear-gradient(90deg, #14b8a6, #3b82f6)",
-                                    width: `${((ov.tankers?.on_trip ?? 0) / (ov.tankers?.total || 1)) * 100}%`,
-                                    transition: "width 1s ease",
-                                }} />
-                            </div>
                         </div>
                     </div>
                 </motion.div>
             </div>
 
-            {/* ── Priority Table ── */}
-            <motion.div className="glass-card full-width" {...fadeInUp} transition={{ delay: 0.4 }}>
+            {/* Priority Table */}
+            <motion.div className="glass-card full-width" {...fadeInUp} transition={{ delay: 0.4 }} style={{ marginTop: "1rem" }}>
                 <div className="section-title">
-                    <span>🏆 Priority Allocation Queue</span>
-                    <button className="btn btn-primary" style={{ padding: "6px 14px", fontSize: "0.8rem" }}
-                        onClick={() => api.autoAllocate().then(refreshAll)}>
-                        <Zap size={14} /> Auto-Allocate
+                    <span>🏆 High-Priority Nagpur Delivery Queue</span>
+                    <button className="btn btn-primary" style={{ padding: "6px 14px", fontSize: "0.8rem" }}>
+                        <Zap size={14} /> Auto-Optimize
                     </button>
                 </div>
                 <div style={{ overflowX: "auto" }}>
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th>#</th>
                                 <th>Village</th>
-                                <th>District</th>
-                                <th>Priority Score</th>
+                                <th>Priority</th>
                                 <th>WSI</th>
                                 <th>Severity</th>
                                 <th>Population</th>
-                                <th>Days Since Supply</th>
+                                <th>Wait Time</th>
                                 <th>Requests</th>
                             </tr>
                         </thead>
                         <tbody>
                             {(prio ?? []).map((v: any, i: number) => (
                                 <tr key={i}>
-                                    <td style={{ fontWeight: 700, color: i < 3 ? "#EF4444" : "#9ca3af" }}>{i + 1}</td>
-                                    <td style={{ fontWeight: 600, color: "#f9fafb" }}>{v.village_name}</td>
-                                    <td>{v.district}</td>
+                                    <td style={{ fontWeight: 600 }}>{v.village_name}</td>
                                     <td>
                                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                            <div style={{ flex: 1, background: "var(--border)", borderRadius: 4, height: 6, maxWidth: 80 }}>
-                                                <div style={{
-                                                    height: "100%", borderRadius: 4, width: `${v.priority_score}%`,
-                                                    background: v.priority_score > 80 ? "#EF4444" : v.priority_score > 60 ? "#F59E0B" : "#10B981",
-                                                }} />
+                                            <div style={{ flex: 1, background: "var(--border)", height: 6, width: 60, borderRadius: 3 }}>
+                                                <div style={{ height: "100%", width: `${v.priority_score}%`, background: v.priority_score > 80 ? "#EF4444" : "#10B981", borderRadius: 3 }} />
                                             </div>
-                                            <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{v.priority_score}</span>
+                                            <strong>{v.priority_score}</strong>
                                         </div>
                                     </td>
-                                    <td style={{ fontWeight: 600 }}>{v.wsi_score}</td>
+                                    <td>{v.wsi_score}</td>
                                     <td><span className={`badge badge-${v.severity}`}>{v.severity}</span></td>
                                     <td>{(v.population || 0).toLocaleString()}</td>
-                                    <td style={{ color: v.days_since_last_supply > 14 ? "#EF4444" : "#9ca3af" }}>
-                                        {v.days_since_last_supply} days
-                                    </td>
+                                    <td style={{ color: v.days_since_last_supply > 15 ? "#EF4444" : "inherit" }}>{v.days_since_last_supply} d</td>
                                     <td>{v.pending_requests}</td>
                                 </tr>
                             ))}
@@ -337,33 +279,6 @@ export default function DashboardPage() {
                     </table>
                 </div>
             </motion.div>
-
-            {/* ── Live Event Feed ── */}
-            {events.length > 0 && (
-                <motion.div className="glass-card" style={{ marginTop: "1.5rem" }} {...fadeInUp}>
-                    <div className="section-title">
-                        <span>📡 Live Event Feed</span>
-                        <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>{events.length} events</span>
-                    </div>
-                    <div style={{ padding: "0.75rem", maxHeight: 200, overflowY: "auto" }}>
-                        {events.map((e, i) => (
-                            <div key={i} style={{
-                                display: "flex", gap: 10, padding: "6px 8px", borderRadius: 8,
-                                marginBottom: 4, background: i === 0 ? "rgba(139,92,246,0.08)" : "transparent",
-                                fontSize: "0.8rem",
-                            }}>
-                                <span style={{ color: "#6b7280", whiteSpace: "nowrap" }}>
-                                    {e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : "—"}
-                                </span>
-                                <span style={{ color: "#8b5cf6", fontWeight: 600, textTransform: "uppercase", fontSize: "0.7rem" }}>
-                                    {e.type}
-                                </span>
-                                <span style={{ color: "#9ca3af" }}>{JSON.stringify(e.data).slice(0, 80)}</span>
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
-            )}
         </div>
     );
 }

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 const features = [
-  { icon: CloudRain, title: "Rainfall Analysis", desc: "Real-time rainfall deviation tracking across 50+ villages", color: "#3b82f6" },
+  { icon: CloudRain, title: "Rainfall Analysis", desc: "Real-time rainfall deviation tracking across Nagpur talukas", color: "#3b82f6" },
   { icon: Droplets, title: "Water Stress Index", desc: "Multi-factor WSI with 4-component scoring algorithm", color: "#14b8a6" },
   { icon: TrendingUp, title: "AI Predictions", desc: "30/60/90 day drought predictions using time-series ML", color: "#8b5cf6" },
   { icon: Truck, title: "Smart Allocation", desc: "Priority-based tanker assignment with severity weighting", color: "#F59E0B" },
@@ -16,10 +16,10 @@ const features = [
 ];
 
 const stats = [
-  { value: "50+", label: "Villages Monitored" },
-  { value: "24mo", label: "Historical Data" },
-  { value: "90d", label: "Prediction Horizon" },
-  { value: "30%", label: "Fuel Savings" },
+  { value: "14", label: "Talukas" },
+  { value: "50+", label: "Villages" },
+  { value: "90d", label: "AI Forecast" },
+  { value: "30%", label: "Wait Reduced" },
 ];
 
 export default function HomePage() {
@@ -64,7 +64,7 @@ export default function HomePage() {
             background: "rgba(20,184,166,0.1)", border: "1px solid rgba(20,184,166,0.2)",
             fontSize: "0.8rem", color: "#14b8a6"
           }}>
-            <AlertTriangle size={14} /> Drought Prevention Platform for Vidarbha, Maharashtra
+            <AlertTriangle size={14} /> Official Nagpur District Smart Pilot
           </div>
 
           <h1 style={{
@@ -75,20 +75,20 @@ export default function HomePage() {
               Predict Droughts.
             </span>
             <br />
-            <span style={{ color: "#f9fafb" }}>Save Vidarbha.</span>
+            <span style={{ color: "#f9fafb" }}>Secure Nagpur.</span>
           </h1>
 
           <p style={{ fontSize: "1.15rem", color: "#9ca3af", maxWidth: 600, margin: "0 auto 2rem", lineHeight: 1.7 }}>
-            AI-powered drought early warning system specifically designed for the **Vidarbha Region**.
-            Transforming crisis response into <strong style={{ color: "#14b8a6" }}>preventive water governance</strong>.
+            AI-powered drought early warning system specifically tailored for **Nagpur District**.
+            Bridging the gap between real-time data and <strong style={{ color: "#14b8a6" }}>governed water delivery</strong>.
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
             <Link href="/dashboard" className="btn btn-primary" style={{ padding: "14px 32px", fontSize: "1rem" }}>
               <BarChart3 size={18} /> Open Dashboard
             </Link>
-            <Link href="/login" className="btn btn-secondary" style={{ padding: "14px 32px", fontSize: "1rem" }}>
-              <MapPin size={18} /> View Map
+            <Link href="/dashboard/map" className="btn btn-secondary" style={{ padding: "14px 32px", fontSize: "1rem" }}>
+              <MapPin size={18} /> Interactive Map
             </Link>
           </div>
         </motion.div>
@@ -109,9 +109,9 @@ export default function HomePage() {
       <section style={{ padding: "4rem", maxWidth: 1200, margin: "0 auto", position: "relative", zIndex: 10 }}>
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <h2 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: 8 }}>
-            Powered by <span style={{ color: "#14b8a6" }}>Advanced Analytics</span>
+            Powered by <span style={{ color: "#14b8a6" }}>District Intelligence</span>
           </h2>
-          <p style={{ color: "#6b7280", fontSize: "1rem" }}>From data to actionable drought intelligence</p>
+          <p style={{ color: "#6b7280", fontSize: "1rem" }}>Transforming administrative response into proactive resilience</p>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
@@ -139,7 +139,7 @@ export default function HomePage() {
         fontSize: "0.8rem", color: "#6b7280",
         position: "relative", zIndex: 10
       }}>
-        JalMitra — Integrated Drought Warning & Smart Tanker Management System © 2026
+        JalMitra — official Nagpur District Integrated Drought Management © 2026
       </footer>
     </div>
   );

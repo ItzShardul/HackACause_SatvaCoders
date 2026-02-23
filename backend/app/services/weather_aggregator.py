@@ -38,7 +38,7 @@ def _set_cache(key: str, value):
 
 async def get_live_rainfall_all_districts() -> Dict:
     """
-    PRIMARY: Open-Meteo (free, no key) — live rainfall for all 11 districts.
+    PRIMARY: Open-Meteo (free, no key) — live rainfall for Nagpur talukas.
     SUPPLEMENT: WeatherAPI.com — adds air quality + weather alerts if key set.
     Returns merged result.
     """

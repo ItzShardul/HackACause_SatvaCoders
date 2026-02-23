@@ -273,7 +273,7 @@ def auto_allocate(db: Session = Depends(get_db)):
 # ROUTE OPTIMIZATION
 # ═══════════════════════════════════════════
 @router.post("/routes/optimize")
-def optimize_tanker_routes(
+async def optimize_tanker_routes(
     district: Optional[str] = None,
     num_vehicles: int = Query(default=3, ge=1, le=10),
     db: Session = Depends(get_db)
@@ -295,8 +295,8 @@ def optimize_tanker_routes(
     first_tanker = tanker_query.first()
 
     depot = {
-        "lat": first_tanker.depot_latitude if first_tanker else 19.8762,
-        "lng": first_tanker.depot_longitude if first_tanker else 75.3433,
+        "lat": first_tanker.depot_latitude if first_tanker else 21.1458,
+        "lng": first_tanker.depot_longitude if first_tanker else 79.0882,
         "name": f"{district or 'Main'} Depot"
     }
 
@@ -314,9 +314,76 @@ def optimize_tanker_routes(
                 "priority": p["priority_score"],
             })
 
-    result = optimize_routes(depot, villages_for_routing, num_vehicles)
+    result = await optimize_routes(depot, villages_for_routing, num_vehicles)
     result["depot"] = depot
+
+    # Fetch road geometry for each route (premium visualization)
+    from app.services.mapping_service import mapping_service
+    
+    for route in result.get("routes", []):
+        all_coords = []
+        # Current location starts at depot
+        curr_lat, curr_lng = depot["lat"], depot["lng"]
+        
+        for stop in route["stops"]:
+            # Segment: curr -> stop
+            segment = await mapping_service.get_road_route([curr_lat, curr_lng], [stop["lat"], stop["lng"]])
+            if segment and "coordinates" in segment:
+                # Mappls returns [lon, lat], we keep that for GeoJSON compatibility
+                all_coords.extend(segment["coordinates"])
+            else:
+                # Fallback to straight line if Mappls fails
+                all_coords.extend([[curr_lng, curr_lat], [stop["lng"], stop["lat"]]])
+            
+            # Update curr for next segment
+            curr_lat, curr_lng = stop["lat"], stop["lng"]
+            
+        # Add return to depot segment
+        back_segment = await mapping_service.get_road_route([curr_lat, curr_lng], [depot["lat"], depot["lng"]])
+        if back_segment and "coordinates" in back_segment:
+            all_coords.extend(back_segment["coordinates"])
+        else:
+            all_coords.extend([[curr_lng, curr_lat], [depot["lng"], depot["lat"]]])
+            
+        route["geometry_coords"] = all_coords
+
     return result
+
+
+@router.get("/routes/calculate")
+async def calculate_manual_route(start_lat: float, start_lon: float, end_lat: float, end_lon: float):
+    """Calculate a single route between two points for manual assignment."""
+    from app.services.mapping_service import mapping_service
+    return await mapping_service.get_road_route([start_lat, start_lon], [end_lat, end_lon])
+
+
+@router.post("/routes/dispatch")
+async def dispatch_unit(data: dict):
+    """Dispatch a specific tanker unit via WhatsApp."""
+    from app.services.whatsapp_service import whatsapp_service
+    
+    # Generate precision links
+    village_name = data.get("village_name", "Target Area")
+    depot = data.get("depot", {"lat": 21.1766, "lng": 79.0614})
+    stops = data.get("stops", [])
+    
+    # Generate high-fidelity Mappls link for the pilot
+    route_link = whatsapp_service.generate_mappls_nav_link(depot, stops)
+
+    try:
+        success = whatsapp_service.send_tanker_dispatch(
+            driver_name=data["driver_name"],
+            driver_phone=data["driver_phone"],
+            village_name=village_name,
+            route_link=route_link,
+            quantity=data.get("quantity", 15000)
+        )
+        if success:
+            return {"status": "success", "message": f"Dispatched to {data['driver_name']}"}
+        else:
+            return {"status": "error", "message": "Twilio send failed. Check logs."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 # ═══════════════════════════════════════════

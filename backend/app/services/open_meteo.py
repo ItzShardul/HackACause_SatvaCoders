@@ -6,27 +6,30 @@ Specialty: Live current conditions, hourly updates, short-term forecast
 import httpx
 from typing import Dict, List
 
-# All 11 Vidarbha districts with GPS coordinates
-VIDARBHA_DISTRICTS = {
-    "Yavatmal":   {"lat": 20.3888, "lon": 78.1204},
-    "Akola":      {"lat": 20.7096, "lon": 77.0075},
-    "Washim":     {"lat": 20.1108, "lon": 77.1330},
-    "Buldhana":   {"lat": 20.5293, "lon": 76.1852},
-    "Amravati":   {"lat": 20.9320, "lon": 77.7523},
-    "Nagpur":     {"lat": 21.1458, "lon": 79.0882},
-    "Wardha":     {"lat": 20.7453, "lon": 78.6022},
-    "Chandrapur": {"lat": 19.9615, "lon": 79.2961},
-    "Bhandara":   {"lat": 21.1667, "lon": 79.6500},
-    "Gondia":     {"lat": 21.4631, "lon": 80.1953},
-    "Gadchiroli": {"lat": 20.1809, "lon": 80.0005},
+# All 14 Nagpur Talukas with GPS coordinates
+NAGPUR_TALUKAS = {
+    "Nagpur Urban": {"lat": 21.1458, "lon": 79.0882},
+    "Nagpur Rural": {"lat": 21.1000, "lon": 79.0500},
+    "Kamptee":      {"lat": 21.2227, "lon": 79.2014},
+    "Hingna":       {"lat": 21.0667, "lon": 78.9667},
+    "Katol":        {"lat": 21.2682, "lon": 78.5833},
+    "Narkhed":      {"lat": 21.4667, "lon": 78.5333},
+    "Savner":       {"lat": 21.3917, "lon": 78.9167},
+    "Kalmeshwar":   {"lat": 21.2333, "lon": 78.9167},
+    "Ramtek":       {"lat": 21.3938, "lon": 79.3275},
+    "Parseoni":     {"lat": 21.3833, "lon": 79.1667},
+    "Mauda":        {"lat": 21.1667, "lon": 79.4333},
+    "Umred":        {"lat": 20.8500, "lon": 79.3333},
+    "Kuhi":         {"lat": 21.0167, "lon": 79.3667},
+    "Bhiwapur":     {"lat": 20.7667, "lon": 79.5167},
 }
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
 
 async def get_district_weather(district: str) -> Dict:
-    """Get current + 14-day forecast for a single district."""
-    coords = VIDARBHA_DISTRICTS.get(district)
+    """Get current + 14-day forecast for a single area."""
+    coords = NAGPUR_TALUKAS.get(district)
     if not coords:
         return {}
 
@@ -89,10 +92,10 @@ async def get_district_weather(district: str) -> Dict:
 
 
 async def get_all_districts_weather() -> Dict[str, Dict]:
-    """Fetch live weather for all 11 Vidarbha districts."""
+    """Fetch live weather for all Nagpur talukas."""
     results = {}
     async with httpx.AsyncClient(timeout=20) as client:
-        for district, coords in VIDARBHA_DISTRICTS.items():
+        for district, coords in NAGPUR_TALUKAS.items():
             try:
                 params = {
                     "latitude": coords["lat"],

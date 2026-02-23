@@ -10,15 +10,21 @@ from datetime import datetime, timedelta
 
 BASE_URL = "https://power.larc.nasa.gov/api/temporal/monthly/point"
 
-VIDARBHA_COORDS = {
-    "Yavatmal":   (20.3888, 78.1204),
-    "Akola":      (20.7096, 77.0075),
-    "Washim":     (20.1108, 77.1330),
-    "Buldhana":   (20.5293, 76.1852),
-    "Amravati":   (20.9320, 77.7523),
-    "Nagpur":     (21.1458, 79.0882),
-    "Wardha":     (20.7453, 78.6022),
-    "Chandrapur": (19.9615, 79.2961),
+NAGPUR_COORDS = {
+    "Nagpur Urban": (21.1458, 79.0882),
+    "Nagpur Rural": (21.1000, 79.0500),
+    "Kamptee":      (21.2227, 79.2014),
+    "Hingna":       (21.0667, 78.9667),
+    "Katol":        (21.2682, 78.5833),
+    "Narkhed":      (21.4667, 78.5333),
+    "Savner":       (21.3917, 78.9167),
+    "Kalmeshwar":   (21.2333, 78.9167),
+    "Ramtek":       (21.3938, 79.3275),
+    "Parseoni":     (21.3833, 79.1667),
+    "Mauda":        (21.1667, 79.4333),
+    "Umred":        (20.8500, 79.3333),
+    "Kuhi":         (21.0167, 79.3667),
+    "Bhiwapur":     (20.7667, 79.5167),
 }
 
 
@@ -27,9 +33,9 @@ async def get_historical_climate(district: str, start_year: int = 1990, end_year
     Fetch 40-year monthly climate data from NASA POWER.
     Returns long-term averages for accurate WSI baseline calculation.
     """
-    coords = VIDARBHA_COORDS.get(district)
+    coords = NAGPUR_COORDS.get(district)
     if not coords:
-        return {"error": f"District {district} not in Vidarbha"}
+        return {"error": f"Area {district} not in Nagpur Pilot"}
 
     lat, lon = coords
     params = {
@@ -117,15 +123,17 @@ async def get_baseline_for_wsi(district: str) -> Dict:
             "drought_frequency_pct": data.get("drought_frequency_pct", 30),
         }
     except Exception:
-        # Fallback: known Vidarbha region averages if API fails
+        # Fallback: known Nagpur region averages if API fails
         defaults = {
-            "Yavatmal": 900, "Akola": 780, "Washim": 820,
-            "Buldhana": 850, "Amravati": 880, "Nagpur": 1100,
-            "Wardha": 980, "Chandrapur": 1200,
+            "Nagpur Urban": 1100, "Nagpur Rural": 1080, "Kamptee": 1120,
+            "Hingna": 1050, "Katol": 980, "Narkhed": 950,
+            "Savner": 1020, "Kalmeshwar": 1040, "Ramtek": 1150,
+            "Parseoni": 1100, "Mauda": 1200, "Umred": 1180,
+            "Kuhi": 1250, "Bhiwapur": 1300
         }
         return {
             "district": district,
-            "annual_normal_mm": defaults.get(district, 900),
+            "annual_normal_mm": defaults.get(district, 1100),
             "monthly_normals": {},
-            "drought_frequency_pct": 35,
+            "drought_frequency_pct": 25,
         }

@@ -28,10 +28,6 @@ async def lifespan(app: FastAPI):
     # Start background weather scheduler
     start_scheduler()
 
-    # Initial weather data load (non-blocking)
-    import asyncio
-    asyncio.create_task(initial_data_load())
-
     yield
 
     # Shutdown
@@ -40,7 +36,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="JalMitra API",
-    description="Integrated Drought Warning & Smart Tanker Management System — Vidarbha Region",
+    description="Integrated Drought Warning & Smart Tanker Management System — Nagpur District Pilot",
     version="2.0.0",
     lifespan=lifespan,
 )
@@ -64,7 +60,7 @@ def root():
     return {
         "name": "JalMitra API v2",
         "version": "2.0.0",
-        "description": "Drought Warning & Tanker Management — Vidarbha Region",
+        "description": "Drought Warning & Tanker Management — Nagpur District Pilot",
         "weather_apis": ["Open-Meteo (live)", "NASA POWER (historical)", "Visual Crossing (daily)", "WeatherAPI (bulk+AQI)"],
         "docs": "/docs",
     }

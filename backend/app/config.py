@@ -8,3 +8,8 @@ TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
 SECRET_KEY = os.getenv("SECRET_KEY", "jalmitra-hackathon-secret-key-2026")
+
+# Mappls (MapmyIndia) Integration
+MAPPLS_CLIENT_ID = os.getenv("MAPPLS_CLIENT_ID", "")
+MAPPLS_CLIENT_SECRET = os.getenv("MAPPLS_CLIENT_SECRET", "")
+MAPPLS_REST_KEY = os.getenv("MAPPLS_REST_KEY", "")

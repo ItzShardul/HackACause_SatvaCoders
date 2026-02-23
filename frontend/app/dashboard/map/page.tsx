@@ -18,18 +18,20 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 // Nagpur District Specific Villages
 const demoVillages = [
-    { id: 1, name: "Kamptee", district: "Nagpur", taluka: "Kamptee", latitude: 21.2227, longitude: 79.2014, population: 84000, wsi: { score: 45.2, severity: "warning" } },
-    { id: 2, name: "Katol", district: "Nagpur", taluka: "Katol", latitude: 21.2682, longitude: 78.5833, population: 42000, wsi: { score: 68.5, severity: "critical" } },
-    { id: 3, name: "Savner", district: "Nagpur", taluka: "Savner", latitude: 21.3917, longitude: 78.9167, population: 31000, wsi: { score: 55.3, severity: "warning" } },
-    { id: 4, name: "Hingna", district: "Nagpur", taluka: "Hingna", latitude: 21.0667, longitude: 78.9667, population: 24000, wsi: { score: 18.2, severity: "normal" } },
-    { id: 5, name: "Umred", district: "Nagpur", taluka: "Umred", latitude: 20.8500, longitude: 79.3333, population: 45000, wsi: { score: 82.1, severity: "critical" } },
-    { id: 6, name: "Ramtek", district: "Nagpur", taluka: "Ramtek", latitude: 21.3833, longitude: 79.3167, population: 22000, wsi: { score: 32.4, severity: "watch" } },
-    { id: 7, name: "Kalmeshwar", district: "Nagpur", taluka: "Kalmeshwar", latitude: 21.2333, longitude: 78.9167, population: 18000, wsi: { score: 48.9, severity: "warning" } },
-    { id: 8, name: "Narkhed", district: "Nagpur", taluka: "Narkhed", latitude: 21.4667, longitude: 78.5333, population: 21000, wsi: { score: 88.5, severity: "emergency" } },
-    { id: 9, name: "Mouda", district: "Nagpur", taluka: "Mouda", latitude: 21.1667, longitude: 79.4333, population: 12000, wsi: { score: 15.2, severity: "normal" } },
-    { id: 10, name: "Parseoni", district: "Nagpur", taluka: "Parseoni", latitude: 21.3833, longitude: 79.1667, population: 15000, wsi: { score: 72.4, severity: "critical" } },
-    { id: 11, name: "Bhiwapur", district: "Nagpur", taluka: "Bhiwapur", latitude: 20.7667, longitude: 79.5167, population: 14000, wsi: { score: 92.1, severity: "emergency" } },
-    { id: 12, name: "Kuhi", district: "Nagpur", taluka: "Kuhi", latitude: 21.0167, longitude: 79.3667, population: 11000, wsi: { score: 64.2, severity: "critical" } },
+    { id: 1, name: "Kamptee", district: "Nagpur", taluka: "Kamptee", latitude: 21.2227, longitude: 79.2014, population: 84300, wsi: { score: 45.2, severity: "warning" } },
+    { id: 2, name: "Katol", district: "Nagpur", taluka: "Katol", latitude: 21.2682, longitude: 78.5833, population: 42100, wsi: { score: 68.5, severity: "critical" } },
+    { id: 3, name: "Savner", district: "Nagpur", taluka: "Savner", latitude: 21.3917, longitude: 78.9167, population: 31200, wsi: { score: 55.3, severity: "warning" } },
+    { id: 4, name: "Hingna", district: "Nagpur", taluka: "Hingna", latitude: 21.0667, longitude: 78.9667, population: 24600, wsi: { score: 18.2, severity: "normal" } },
+    { id: 5, name: "Umred", district: "Nagpur", taluka: "Umred", latitude: 20.8500, longitude: 79.3333, population: 45600, wsi: { score: 82.1, severity: "critical" } },
+    { id: 6, name: "Ramtek", district: "Nagpur", taluka: "Ramtek", latitude: 21.3833, longitude: 79.3167, population: 22400, wsi: { score: 68.4, severity: "warning" } },
+    { id: 7, name: "Kalmeshwar", district: "Nagpur", taluka: "Kalmeshwar", latitude: 21.2333, longitude: 78.9167, population: 18200, wsi: { score: 48.9, severity: "warning" } },
+    { id: 8, name: "Narkhed", district: "Nagpur", taluka: "Narkhed", latitude: 21.4667, longitude: 78.5333, population: 21500, wsi: { score: 88.5, severity: "emergency" } },
+    { id: 9, name: "Mauda", district: "Nagpur", taluka: "Mauda", latitude: 21.1667, longitude: 79.4333, population: 12500, wsi: { score: 42.1, severity: "watch" } },
+    { id: 10, name: "Parseoni", district: "Nagpur", taluka: "Parseoni", latitude: 21.3833, longitude: 79.1667, population: 15300, wsi: { score: 72.4, severity: "critical" } },
+    { id: 11, name: "Bhiwapur", district: "Nagpur", taluka: "Bhiwapur", latitude: 20.7667, longitude: 79.5167, population: 14200, wsi: { score: 92.1, severity: "emergency" } },
+    { id: 12, name: "Kuhi", district: "Nagpur", taluka: "Kuhi", latitude: 21.0167, longitude: 79.3667, population: 11200, wsi: { score: 64.2, severity: "critical" } },
+    { id: 13, name: "Nagpur Rural", district: "Nagpur", taluka: "Nagpur Rural", latitude: 21.1000, longitude: 79.0500, population: 65000, wsi: { score: 30.1, severity: "watch" } },
+    { id: 14, name: "Nagpur Urban", district: "Nagpur", taluka: "Nagpur Urban", latitude: 21.1458, longitude: 79.0882, population: 250000, wsi: { score: 12.5, severity: "normal" } },
 ];
 
 export default function DroughtMapPage() {
@@ -91,8 +93,8 @@ export default function DroughtMapPage() {
                         scrollWheelZoom={true}
                     >
                         <TileLayer
-                            attribution='&copy; <a href="https://carto.com">CARTO</a>'
-                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                            attribution='&copy; <a href="https://www.mappls.com">Mappls MapmyIndia</a> &copy; OpenStreetMap contributors'
+                            url={`https://apis.mappls.com/advancedmaps/v1/d4e85a7e34907841d6a307dc31c6918a/still_map/{z}/{x}/{y}.png`}
                         />
 
                         {/* Nagpur Boundary Layer */}

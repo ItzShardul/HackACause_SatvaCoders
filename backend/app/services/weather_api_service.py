@@ -12,18 +12,19 @@ import asyncio
 API_KEY = os.getenv("WEATHER_API_KEY", "YOUR_FREE_KEY_HERE")
 BASE_URL = "https://api.weatherapi.com/v1"
 
-VIDARBHA_DISTRICTS = [
-    "Yavatmal,Maharashtra", "Akola,Maharashtra", "Washim,Maharashtra",
-    "Buldhana,Maharashtra", "Amravati,Maharashtra", "Nagpur,Maharashtra",
-    "Wardha,Maharashtra", "Chandrapur,Maharashtra", "Bhandara,Maharashtra",
-    "Gondia,Maharashtra", "Gadchiroli,Maharashtra",
+NAGPUR_TALUKAS = [
+    "Nagpur Urban,Maharashtra", "Nagpur Rural,Maharashtra", "Kamptee,Maharashtra",
+    "Hingna,Maharashtra", "Katol,Maharashtra", "Narkhed,Maharashtra",
+    "Savner,Maharashtra", "Kalmeshwar,Maharashtra", "Ramtek,Maharashtra",
+    "Parseoni,Maharashtra", "Mauda,Maharashtra", "Umred,Maharashtra",
+    "Kuhi,Maharashtra", "Bhiwapur,Maharashtra",
 ]
 
 
 async def get_current_all_districts() -> Dict[str, Dict]:
     """
-    Fetch current weather for ALL 11 Vidarbha districts simultaneously.
-    Specialty: Bulk parallel queries — entire Vidarbha in one sweep.
+    Fetch current weather for ALL 14 Nagpur talukas simultaneously.
+    Specialty: Bulk parallel queries — entire Nagpur area in one sweep.
     """
     if API_KEY == "YOUR_FREE_KEY_HERE":
         return {
@@ -68,8 +69,8 @@ async def get_current_all_districts() -> Dict[str, Dict]:
         except Exception as e:
             results[district_name] = {"district": district_name, "error": str(e)}
 
-    # Fetch all districts in parallel
-    await asyncio.gather(*[fetch_one(d) for d in VIDARBHA_DISTRICTS])
+    # Fetch all talukas in parallel
+    await asyncio.gather(*[fetch_one(d) for d in NAGPUR_TALUKAS])
     return results
 
 

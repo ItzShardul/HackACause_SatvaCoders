@@ -35,13 +35,16 @@ async def dispatch_tanker(request: DispatchRequest):
     Generate a Google Maps link and send it to the driver via WhatsApp.
     """
     try:
-        # 1. Generate Navigation Link
-        maps_link = whatsapp_service.generate_google_maps_link(request.depot, request.stops)
+        # 1. Generate Mappls Navigation Link (primary) with Google Maps fallback
+        try:
+            maps_link = whatsapp_service.generate_mappls_nav_link(request.depot, request.stops)
+        except Exception:
+            maps_link = whatsapp_service.generate_google_maps_link(request.depot, request.stops)
         
         # 2. Add some fallback logic for driver phone
         phone = request.driver_phone
         if not phone.startswith("+"):
-            phone = "+91" + phone # Default to India for Vidarbha
+            phone = "+91" + phone # Default to India for Nagpur
             
         # 3. Send Message
         success = whatsapp_service.send_tanker_dispatch(

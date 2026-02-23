@@ -17,7 +17,7 @@ weather_router = APIRouter(prefix="/api/weather", tags=["weather"])
 @weather_router.get("/live")
 async def live_rainfall():
     """
-    Open-Meteo + WeatherAPI: Live rainfall for all 11 Vidarbha districts.
+    Open-Meteo + WeatherAPI: Live rainfall for all Nagpur District Talukas.
     Refreshes every 30 minutes. No API key needed for Open-Meteo.
     """
     return await get_live_rainfall_all_districts()

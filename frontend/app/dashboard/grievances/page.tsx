@@ -12,6 +12,7 @@ const demoGrievances = [
     { id: 2, village_name: "Savner", submitted_by: "Priya S.", category: "quality", description: "Water delivered today was brownish and sandy", status: "in_progress", created_at: "2026-02-20T08:30:00" },
     { id: 3, village_name: "Kamptee", submitted_by: "Sanjay W.", category: "quantity", description: "Only 5000L delivered instead of requested 10000L", status: "open", created_at: "2026-02-21T14:00:00" },
     { id: 4, village_name: "Umred", submitted_by: "Anita D.", category: "delay", description: "No response to our water request for 5 days", status: "resolved", created_at: "2026-02-15T09:00:00", resolution: "Tanker MH-31-TR-1021 dispatched on priority" },
+    { id: 5, village_name: "Ramtek", submitted_by: "Manoj K.", category: "quality", description: "Water has a strange metallic smell", status: "open", created_at: "2026-02-23T07:15:00" },
 ];
 
 export default function GrievancesPage() {

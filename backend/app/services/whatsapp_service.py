@@ -32,8 +32,9 @@ class WhatsAppService:
             f"📍 *Village*: {village_name}\n"
             f"📦 *Quantity*: {quantity} Liters\n"
             f"🗓️ *Priority*: EMERGENCY\n\n"
-            f"🗺️ *Open Navigation*: {route_link}\n\n"
-            f"Please confirm once you start the trip. Safe travels!"
+            f"🗺️ *Route (Mappls)*: {route_link}\n"
+            f"📍 *Destination (Google Maps)*: https://www.google.com/maps/search/?api=1&query={village_name.replace(' ', '+')}\n\n"
+            f"Please confirm once you start the trip. Safe travels! 🙏"
         )
 
         try:
@@ -48,26 +49,38 @@ class WhatsAppService:
             print(f"❌ Failed to send WhatsApp: {str(e)}")
             return False
 
-    def generate_google_maps_link(self, depot: Dict, stops: List[Dict]) -> str:
-        """Create a Google Maps multi-stop navigation link."""
-        # Base URL for directions
-        base_url = "https://www.google.com/maps/dir/?api=1"
+    def generate_mappls_nav_link(self, depot: Dict, stops: List[Dict]) -> str:
+        """
+        Create a Mappls (MapmyIndia) multi-stop navigation link.
+        This opens directly in the Mappls app or website for Indian roads.
+        Format: https://maps.mappls.com/directions?origin=lat,lon&destination=lat,lon
+        """
         origin = f"{depot['lat']},{depot['lng']}"
-        
-        # Stop coordinates
         destination = f"{stops[-1]['lat']},{stops[-1]['lng']}" if stops else origin
         
+        waypoints = []
+        if len(stops) > 1:
+            for stop in stops[:-1]:
+                waypoints.append(f"{stop['lat']},{stop['lng']}")
+        
+        link = f"https://maps.mappls.com/directions?origin={origin}&destination={destination}"
+        if waypoints:
+            link += f"&waypoints={'|'.join(waypoints)}"
+        return link
+
+    def generate_google_maps_link(self, depot: Dict, stops: List[Dict]) -> str:
+        """Fallback: Create a Google Maps multi-stop navigation link."""
+        base_url = "https://www.google.com/maps/dir/?api=1"
+        origin = f"{depot['lat']},{depot['lng']}"
+        destination = f"{stops[-1]['lat']},{stops[-1]['lng']}" if stops else origin
         waypoint_list = []
         if len(stops) > 1:
             for stop in stops[:-1]:
                 waypoint_list.append(f"{stop['lat']},{stop['lng']}")
-        
         waypoints = "|".join(waypoint_list)
-        
         link = f"{base_url}&origin={origin}&destination={destination}"
         if waypoints:
             link += f"&waypoints={waypoints}"
-            
         return link
 
 whatsapp_service = WhatsAppService()

@@ -34,9 +34,15 @@ const demoPriorities = [
     { village_name: "Katol", district: "Nagpur", priority_score: 82.3, wsi_score: 78.4, severity: "critical", population: 42100, days_since_last_supply: 14, pending_requests: 2 },
     { village_name: "Umred", district: "Nagpur", priority_score: 79.8, wsi_score: 75.1, severity: "critical", population: 45600, days_since_last_supply: 12, pending_requests: 1 },
     { village_name: "Parseoni", district: "Nagpur", priority_score: 75.6, wsi_score: 72.4, severity: "critical", population: 15300, days_since_last_supply: 15, pending_requests: 2 },
+    { village_name: "Ramtek", district: "Nagpur", priority_score: 73.2, wsi_score: 68.4, severity: "warning", population: 22400, days_since_last_supply: 11, pending_requests: 1 },
     { village_name: "Kuhi", district: "Nagpur", priority_score: 72.1, wsi_score: 64.2, severity: "warning", population: 11200, days_since_last_supply: 9, pending_requests: 1 },
     { village_name: "Kamptee", district: "Nagpur", priority_score: 55.4, wsi_score: 45.2, severity: "warning", population: 84300, days_since_last_supply: 7, pending_requests: 0 },
     { village_name: "Savner", district: "Nagpur", priority_score: 52.1, wsi_score: 55.3, severity: "warning", population: 31200, days_since_last_supply: 10, pending_requests: 1 },
+    { village_name: "Mauda", district: "Nagpur", priority_score: 48.5, wsi_score: 42.1, severity: "watch", population: 12500, days_since_last_supply: 5, pending_requests: 0 },
+    { village_name: "Kalmeshwar", district: "Nagpur", priority_score: 45.2, wsi_score: 48.9, severity: "warning", population: 18200, days_since_last_supply: 8, pending_requests: 1 },
+    { village_name: "Hingna", district: "Nagpur", priority_score: 32.1, wsi_score: 18.2, severity: "normal", population: 24600, days_since_last_supply: 4, pending_requests: 0 },
+    { village_name: "Nagpur Rural", district: "Nagpur", priority_score: 28.5, wsi_score: 30.1, severity: "watch", population: 65000, days_since_last_supply: 6, pending_requests: 1 },
+    { village_name: "Nagpur Urban", district: "Nagpur", priority_score: 15.2, wsi_score: 12.5, severity: "normal", population: 250000, days_since_last_supply: 2, pending_requests: 0 },
 ];
 
 const demoRainfall = [
@@ -130,7 +136,7 @@ export default function DashboardPage() {
                 {[
                     {
                         label: "Monitored Villages", value: ov.total_villages,
-                        color: "#14b8a6", icon: MapPin, sub: "Nagpur District",
+                        color: "#14b8a6", icon: MapPin, sub: "Coverage: All 14 Nagpur Talukas",
                     },
                     {
                         label: "Avg. Water Stress", value: ov.avg_wsi,

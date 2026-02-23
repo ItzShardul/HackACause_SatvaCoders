@@ -1,99 +1,152 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, MapPin, Clock, Truck, ChevronRight, Navigation, Send, CheckCircle2, AlertCircle, Play } from "lucide-react";
+import { Zap, MapPin, Clock, Truck, Plus, Navigation, Send, CheckCircle2, Play, UserPlus } from "lucide-react";
 import { api } from "@/lib/api";
 
-// Leaflet
+// Leaflet dynamic imports
 const MapContainer = dynamic(() => import("react-leaflet").then(m => m.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then(m => m.TileLayer), { ssr: false });
 const Marker = dynamic(() => import("react-leaflet").then(m => m.Marker), { ssr: false });
 const Polyline = dynamic(() => import("react-leaflet").then(m => m.Polyline), { ssr: false });
 const Popup = dynamic(() => import("react-leaflet").then(m => m.Popup), { ssr: false });
+const GeoJSON = dynamic(() => import("react-leaflet").then(m => m.GeoJSON), { ssr: false });
 
 const ROUTE_COLORS = ["#14b8a6", "#3b82f6", "#F59E0B", "#8b5cf6", "#EF4444", "#EC4899"];
 
 // Component for the moving tanker animation
-const MovingTanker = ({ path, color, isVisible }: { path: any[], color: string, isVisible: boolean }) => {
+const MovingTanker = ({ path, color, isVisible, isLive }: { path: any[], color: string, isVisible: boolean, isLive?: boolean }) => {
     const [posIdx, setPosIdx] = useState(0);
     const [coords, setCoords] = useState<[number, number] | null>(null);
 
+    // RCOEM Digital Tower Coordinates for Live Demo
+    const RCOEM_COORDS: [number, number] = [21.1766, 79.0614];
+
     useEffect(() => {
         if (!isVisible || path.length === 0) return;
-
         const interval = setInterval(() => {
             setPosIdx(prev => (prev + 1) % path.length);
-        }, 100); // Fast enough to look like movement
-
+        }, 120);
         return () => clearInterval(interval);
     }, [path, isVisible]);
 
     useEffect(() => {
-        if (path.length > 0) {
+        if (isLive && !isVisible) {
+            setCoords(RCOEM_COORDS);
+        } else if (path.length > 0) {
             setCoords(path[posIdx]);
         }
-    }, [posIdx, path]);
+    }, [posIdx, path, isLive, isVisible]);
 
     const L = typeof window !== 'undefined' ? require('leaflet') : null;
-    if (!L || !coords || !isVisible) return null;
+    if (!L || !coords) return null;
 
     const truckIcon = new L.DivIcon({
         className: 'moving-truck-icon',
-        html: `<div style="background-color: ${color}; width: 20px; height: 20px; border: 3px solid white; border-radius: 4px; box-shadow: 0 0 10px ${color}; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;">🚚</div>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10]
+        html: `
+            <div style="position: relative;">
+                ${isLive ? `<div class="pulse-ring" style="border-color: ${color}"></div>` : ''}
+                <div style="background-color: ${color}; width: 24px; height: 24px; border: 3px solid white; border-radius: 6px; box-shadow: 0 0 15px ${color}; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; z-index: 10;">
+                    ${isLive ? '📡' : '🚚'}
+                </div>
+                ${isLive ? `<div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: ${color}; color: white; padding: 2px 4px; border-radius: 4px; font-size: 8px; font-weight: 800; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">LIVE RCOEM</div>` : ''}
+            </div>
+        `,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
     });
 
-    return <Marker position={coords} icon={truckIcon} />;
+    return (isVisible || isLive) ? <Marker position={coords} icon={truckIcon} /> : null;
 };
 
 export default function RoutesPage() {
-    const [routesData, setRoutesData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [dispatching, setDispatching] = useState<number | null>(null);
     const [dispatchStatus, setDispatchStatus] = useState<Record<number, string>>({});
-    const [numVehicles, setNumVehicles] = useState(3);
     const [roadPaths, setRoadPaths] = useState<Record<number, any[]>>({});
     const [selectedTanker, setSelectedTanker] = useState<number | null>(null);
     const [isSimulating, setIsSimulating] = useState(false);
+    const [boundaryData, setBoundaryData] = useState<any>(null);
 
-    const optimize = async () => {
-        setLoading(true);
-        setRoadPaths({});
-        setDispatchStatus({});
-        setIsSimulating(false);
-        try {
-            const data = await api.optimizeRoutes(undefined, numVehicles);
-            setRoutesData(data);
+    useEffect(() => {
+        fetch("/nagpur.geojson")
+            .then(res => res.json())
+            .then(data => setBoundaryData(data))
+            .catch(err => console.error("Error loading boundary:", err));
+    }, []);
 
-            if (data.routes) {
-                data.routes.forEach(async (route: any, idx: number) => {
-                    await fetchRoadPath(route, idx, data.depot || { lat: 21.1458, lng: 79.0882 });
-                });
-            }
-        } catch (err) {
-            console.error("Optimization failed:", err);
+    // ─── TEAMMATE DRIVER REGISTRY ───
+    const [teammateDrivers, setTeammateDrivers] = useState([
+        { name: "Guru Sawarkar", phone: "+918446241075" },
+        { name: "Aman Kumar", phone: "+916377620244" },
+    ]);
+    const [selectedDrivers, setSelectedDrivers] = useState<Record<number, number>>({ 0: 0, 1: 1 });
+    const [selectedDestinations, setSelectedDestinations] = useState<Record<number, string>>({});
+
+    const nagpurVillages = [
+        { name: "Katol", lat: 21.2682, lng: 78.5833 },
+        { name: "Savner", lat: 21.3917, lng: 78.9167 },
+        { name: "Umred", lat: 20.8500, lng: 79.3333 },
+        { name: "Narkhed", lat: 21.4667, lng: 78.5333 },
+        { name: "Ramtek", lat: 21.3938, lng: 79.3275 },
+        { name: "Hingna", lat: 21.0667, lng: 78.9667 },
+        { name: "Kamptee", lat: 21.2227, lng: 79.2014 },
+        { name: "Kalmeshwar", lat: 21.2333, lng: 78.9167 },
+        { name: "Parseoni", lat: 21.3833, lng: 79.3333 },
+        { name: "Mauda", lat: 21.1667, lng: 79.4833 },
+        { name: "Kuhi", lat: 21.0167, lng: 79.3500 },
+        { name: "Bhiwapur", lat: 20.7667, lng: 79.5167 },
+    ];
+
+    const addDriver = () => {
+        const name = prompt("Enter Driver Name:");
+        const phone = prompt("Enter Driver Phone (+91...):");
+        if (name && phone) {
+            const newIndex = teammateDrivers.length;
+            setTeammateDrivers(prev => [...prev, { name, phone }]);
+            setSelectedDrivers(prev => ({ ...prev, [newIndex]: newIndex }));
         }
-        setLoading(false);
     };
 
-    const handleDispatch = async (route: any, idx: number) => {
+    const handleManualDestination = async (tankerIdx: number, villageName: string) => {
+        const village = nagpurVillages.find(v => v.name === villageName);
+        if (!village) return;
+
+        setSelectedDestinations(prev => ({ ...prev, [tankerIdx]: villageName }));
+
+        try {
+            const start: [number, number] = [21.1766, 79.0614]; // RCOEM Digital Tower
+            const end: [number, number] = [village.lat, village.lng];
+            const route = await api.getRoute(start, end);
+            if (route && route.coordinates) {
+                const path = route.coordinates.map((c: any) => [c[1], c[0]]);
+                setRoadPaths(prev => ({ ...prev, [tankerIdx]: path }));
+            }
+        } catch (err) {
+            setRoadPaths(prev => ({ ...prev, [tankerIdx]: [[21.1766, 79.0614], [village.lat, village.lng]] }));
+        }
+    };
+
+    const handleDispatch = async (idx: number) => {
         setDispatching(idx);
+        const driver = teammateDrivers[selectedDrivers[idx] || 0];
+        const destName = selectedDestinations[idx];
+        const village = nagpurVillages.find(v => v.name === destName);
+
         try {
             const driverData = {
-                driver_name: `Driver ${idx + 1}`,
-                driver_phone: "8459468626",
-                village_name: route.stops[0].village_name,
-                depot: routesData.depot,
-                stops: route.stops,
-                quantity: route.stops.reduce((acc: number, s: any) => acc + s.demand, 0)
+                driver_name: driver.name,
+                driver_phone: driver.phone,
+                village_name: destName || "Assigned Area",
+                depot: { lat: 21.1766, lng: 79.0614 },
+                stops: village ? [{ ...village, id: 999 }] : [],
+                quantity: 15000
             };
 
             const res = await api.dispatchTanker(driverData);
             if (res.status === "success") {
                 setDispatchStatus(prev => ({ ...prev, [idx]: "success" }));
-                // Start movement for this specific tanker
                 setSelectedTanker(idx);
                 setIsSimulating(true);
             } else {
@@ -103,33 +156,6 @@ export default function RoutesPage() {
             setDispatchStatus(prev => ({ ...prev, [idx]: "error" }));
         }
         setDispatching(null);
-    };
-
-    const fetchRoadPath = async (route: any, tankerIdx: number, depot: any) => {
-        const fullPath: any[] = [];
-        let currentPos = [depot.lat, depot.lng];
-
-        for (const stop of route.stops) {
-            try {
-                const step = await api.getRoute(currentPos as [number, number], [stop.lat, stop.lng]);
-                const coords = step.coordinates.map((c: any) => [c[1], c[0]]);
-                fullPath.push(...coords);
-                currentPos = [stop.lat, stop.lng];
-            } catch (e) {
-                fullPath.push(currentPos, [stop.lat, stop.lng]);
-                currentPos = [stop.lat, stop.lng];
-            }
-        }
-
-        try {
-            const lastStep = await api.getRoute(currentPos as [number, number], [depot.lat, depot.lng]);
-            const lastCoords = lastStep.coordinates.map((c: any) => [c[1], c[0]]);
-            fullPath.push(...lastCoords);
-        } catch {
-            fullPath.push(currentPos, [depot.lat, depot.lng]);
-        }
-
-        setRoadPaths(prev => ({ ...prev, [tankerIdx]: fullPath }));
     };
 
     const L = typeof window !== 'undefined' ? require('leaflet') : null;
@@ -149,162 +175,150 @@ export default function RoutesPage() {
         <div style={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column" }}>
             <div className="page-header" style={{ marginBottom: 0, borderBottom: "none" }}>
                 <div>
-                    <h1>⚡ Nagpur Route Optimizer</h1>
+                    <h1>📡 Smart Mission Control</h1>
                     <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: 4 }}>
-                        VRP Dispatching with Real-Time GPS Simulation
+                        Real-Time Satellite Dispatch & Driver Monitoring
                     </p>
                 </div>
                 <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                    <div className="glass-card" style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Simulate:</span>
-                        <button
-                            onClick={() => setIsSimulating(!isSimulating)}
-                            className={`btn ${isSimulating ? 'btn-primary' : 'btn-secondary'}`}
-                            style={{ padding: "4px 12px", fontSize: "0.7rem", display: 'flex', alignItems: 'center', gap: 5 }}
-                        >
-                            <Play size={12} fill={isSimulating ? "white" : "none"} /> {isSimulating ? "Moving" : "Paused"}
-                        </button>
-                    </div>
-                    <div className="glass-card" style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Nagpur Fleet:</span>
-                        <select value={numVehicles} onChange={(e) => setNumVehicles(Number(e.target.value))}
-                            style={{ background: "transparent", border: "none", color: "#f9fafb", fontSize: "0.85rem", outline: "none", fontWeight: 700 }}>
-                            {[2, 3, 4, 5, 8].map(n => <option key={n} value={n} style={{ background: "#111827" }}>{n} Tankers</option>)}
-                        </select>
-                    </div>
-                    <button className="btn btn-primary" onClick={optimize} disabled={loading} style={{ minWidth: 160 }}>
-                        <Zap size={16} fill={loading ? "white" : "none"} /> {loading ? "Optimizing..." : "Optimize Routes"}
+                    <button className="btn btn-primary" onClick={addDriver} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <Plus size={18} /> Register New Driver
                     </button>
+                    <div className="glass-card" style={{ padding: "4px 12px", display: "flex", alignItems: "center", gap: 10 }}>
+                        <Clock size={16} className="text-teal" />
+                        <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>17:15 LIVE</span>
+                    </div>
                 </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: "1.5rem", flex: 1, overflow: "hidden", marginTop: "1rem" }}>
-                {/* Side Panel */}
                 <div style={{ overflowY: "auto", paddingRight: "0.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <AnimatePresence>
-                        {routesData ? (
-                            <>
-                                <motion.div className="stat-card" style={{ padding: "1rem" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                                        <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Pilot Logistics</span>
-                                        <span className="badge badge-normal">Nagpur Pilot</span>
-                                    </div>
-                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                                        <div>
-                                            <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent-teal)" }}>{routesData.total_distance_km}km</div>
-                                            <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Total Travel</div>
-                                        </div>
-                                        <div>
-                                            <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent-blue)" }}>{routesData.num_villages_served}</div>
-                                            <div style={{ fontSize: "0.7rem", color: "#6b7280" }}>Villages Reached</div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-
-                                {routesData.routes?.map((route: any, idx: number) => (
-                                    <motion.div
-                                        key={idx}
-                                        className={`glass-card ${selectedTanker === idx ? 'active-route' : ''}`}
-                                        style={{
-                                            borderLeft: `4px solid ${ROUTE_COLORS[idx]}`,
-                                            background: selectedTanker === idx ? 'rgba(255,255,255,0.05)' : 'var(--bg-card)'
-                                        }}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                    >
-                                        <div style={{ padding: "1rem" }}>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => setSelectedTanker(selectedTanker === idx ? null : idx)}>
-                                                    <Truck size={18} color={ROUTE_COLORS[idx]} />
-                                                    <span style={{ fontWeight: 700 }}>Tanker {idx + 1}</span>
-                                                </div>
-                                                <div style={{ textAlign: "right" }}>
-                                                    <div style={{ fontSize: "0.85rem", fontWeight: 800 }}>{route.total_distance_km} km</div>
-                                                    <button
-                                                        onClick={() => handleDispatch(route, idx)}
-                                                        disabled={dispatching === idx}
-                                                        style={{
-                                                            fontSize: "0.65rem",
-                                                            padding: "4px 8px",
-                                                            marginTop: 4,
-                                                            background: dispatchStatus[idx] === 'success' ? '#10B981' : dispatchStatus[idx] === 'error' ? '#EF4444' : 'var(--accent-teal)',
-                                                            color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer',
-                                                            display: 'flex', alignItems: 'center', gap: 4, width: '100%'
-                                                        }}>
-                                                        {dispatching === idx ? <Zap size={10} className="animate-pulse" /> : dispatchStatus[idx] === 'success' ? <CheckCircle2 size={10} /> : dispatchStatus[idx] === 'error' ? <AlertCircle size={10} /> : <Send size={10} />}
-                                                        {dispatching === idx ? "Notifying..." : dispatchStatus[idx] === 'success' ? "Dispatched" : dispatchStatus[idx] === 'error' ? "Retry" : "Dispatch"}
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-                                                {route.stops.map((stop: any, si: number) => (
-                                                    <div key={si} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "0.75rem" }}>
-                                                        <div style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem" }}>{si + 1}</div>
-                                                        <span style={{ color: "#9ca3af", flex: 1 }}>{stop.village_name}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </>
-                        ) : (
-                            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#4b5563" }}>
-                                <Navigation size={40} style={{ margin: "0 auto 1rem", opacity: 0.2 }} />
-                                <p style={{ fontSize: "0.9rem" }}>Optimize Nagpur routes to start dispatch.</p>
+                    {teammateDrivers.map((_, idx) => (
+                        <motion.div
+                            key={idx}
+                            className={`glass-card ${selectedTanker === idx ? 'active-route' : ''}`}
+                            style={{
+                                borderLeft: `6px solid ${ROUTE_COLORS[idx % ROUTE_COLORS.length]}`,
+                                background: selectedTanker === idx ? 'rgba(255,255,255,0.08)' : 'rgba(30, 41, 59, 0.4)',
+                                padding: "1.25rem",
+                                position: "relative"
+                            }}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            onClick={() => setSelectedTanker(idx)}
+                        >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <Truck size={20} color={ROUTE_COLORS[idx % ROUTE_COLORS.length]} />
+                                    <span style={{ fontWeight: 800, fontSize: "1rem" }}>Tanker Unit {idx + 1}</span>
+                                </div>
+                                {dispatchStatus[idx] === 'success' && <div className="badge badge-success">Active</div>}
                             </div>
-                        )}
-                    </AnimatePresence>
+
+                            <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: 8, marginBottom: 12 }}>
+                                <div style={{ fontSize: "0.6rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Assigned Pilot</div>
+                                <select
+                                    value={selectedDrivers[idx] ?? idx}
+                                    onChange={(e) => setSelectedDrivers(prev => ({ ...prev, [idx]: parseInt(e.target.value) }))}
+                                    style={{ background: "transparent", border: "none", color: "white", fontSize: "0.85rem", outline: "none", width: "100%", fontWeight: 700 }}
+                                >
+                                    {teammateDrivers.map((driver, dIdx) => (
+                                        <option key={dIdx} value={dIdx} style={{ background: "#0f172a", color: "white" }}>
+                                            {driver.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px", borderRadius: 8, marginBottom: 15 }}>
+                                <div style={{ fontSize: "0.6rem", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>Mission Destination</div>
+                                <select
+                                    value={selectedDestinations[idx] || ""}
+                                    onChange={(e) => handleManualDestination(idx, e.target.value)}
+                                    style={{ background: "transparent", border: "none", color: "var(--accent-teal)", fontSize: "0.85rem", outline: "none", width: "100%", fontWeight: 700 }}
+                                >
+                                    <option value="" disabled style={{ background: "#0f172a" }}>Select Destination...</option>
+                                    {nagpurVillages.map((v, vIdx) => (
+                                        <option key={vIdx} value={v.name} style={{ background: "#0f172a", color: "white" }}>
+                                            {v.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <button
+                                className={`btn ${dispatchStatus[idx] === 'success' ? 'btn-success' : 'btn-primary'}`}
+                                style={{ width: "100%", padding: "10px", fontWeight: 700 }}
+                                onClick={(e) => { e.stopPropagation(); handleDispatch(idx); }}
+                                disabled={dispatching === idx}
+                            >
+                                {dispatching === idx ? (
+                                    <div className="spinner" style={{ borderLeftColor: "white" }}></div>
+                                ) : dispatchStatus[idx] === 'success' ? (
+                                    <><CheckCircle2 size={16} /> Mission Dispatched</>
+                                ) : (
+                                    <><Send size={16} /> Dispatch via WhatsApp</>
+                                )}
+                            </button>
+                        </motion.div>
+                    ))}
                 </div>
 
-                {/* Map View */}
-                <div className="glass-card" style={{ position: "relative", overflow: "hidden" }}>
+                <div className="glass-card" style={{ position: "relative", overflow: "hidden", border: "none" }}>
                     <MapContainer center={[21.1458, 79.0882]} zoom={10} style={{ height: "100%", width: "100%" }}>
-                        <TileLayer attribution='&copy; CARTO' url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+                        <TileLayer attribution='&copy; Mappls' url={`https://apis.mappls.com/advancedmaps/v1/d4e85a7e34907841d6a307dc31c6918a/still_map/{z}/{x}/{y}.png`} />
+
+                        {/* Nagpur Boundary Layer */}
+                        {boundaryData && (
+                            <GeoJSON
+                                data={boundaryData}
+                                style={{
+                                    color: "rgba(255,255,255,0.15)",
+                                    weight: 2,
+                                    fillColor: "#f59e0b",
+                                    fillOpacity: 0.02,
+                                    dashArray: "5, 10"
+                                }}
+                            />
+                        )}
 
                         {L && <Marker position={[21.1458, 79.0882]} icon={depotIcon!}><Popup>Main Nagpur Depot</Popup></Marker>}
 
                         {Object.entries(roadPaths).map(([idx, path]) => (
                             <Polyline
                                 key={idx}
-                                positions={path}
-                                color={ROUTE_COLORS[Number(idx)]}
-                                weight={selectedTanker === null || selectedTanker === Number(idx) ? 4 : 1}
+                                positions={path as any}
+                                color={ROUTE_COLORS[Number(idx) % ROUTE_COLORS.length]}
+                                weight={selectedTanker === Number(idx) ? 6 : 3}
                                 opacity={selectedTanker === null || selectedTanker === Number(idx) ? 1 : 0.2}
                             />
                         ))}
 
-                        {/* Animated Tankers */}
                         {Object.entries(roadPaths).map(([idx, path]) => (
                             <MovingTanker
-                                key={`moving-${idx}`}
+                                key={`mov-${idx}`}
                                 path={path}
-                                color={ROUTE_COLORS[Number(idx)]}
+                                color={ROUTE_COLORS[Number(idx) % ROUTE_COLORS.length]}
                                 isVisible={isSimulating && (selectedTanker === null || selectedTanker === Number(idx))}
+                                isLive={true}
                             />
                         ))}
 
-                        {routesData?.routes?.map((route: any, idx: number) => (
-                            (selectedTanker === null || selectedTanker === idx) && route.stops.map((stop: any, si: number) => (
-                                <Marker key={`${idx}-${si}`} position={[stop.lat, stop.lng]} icon={tankerIcon(ROUTE_COLORS[idx])!}>
-                                    <Popup>
-                                        <div style={{ fontSize: "0.8rem" }}>
-                                            <strong>{stop.village_name}</strong><br />
-                                            Sequence: {stop.sequence}<br />
-                                            Demand: {stop.demand} L
-                                        </div>
-                                    </Popup>
+                        {Object.entries(selectedDestinations).map(([idx, name]) => {
+                            const village = nagpurVillages.find(v => v.name === name);
+                            if (!village) return null;
+                            return (
+                                <Marker key={`dest-${idx}`} position={[village.lat, village.lng]} icon={tankerIcon(ROUTE_COLORS[Number(idx) % ROUTE_COLORS.length])!}>
+                                    <Popup><strong>{name}</strong><br />Emergency Mission Target</Popup>
                                 </Marker>
-                            ))
-                        ))}
+                            );
+                        })}
                     </MapContainer>
 
                     <div style={{ position: "absolute", bottom: 20, right: 20, zIndex: 1000 }}>
-                        <div className="glass-card" style={{ padding: "8px 12px", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: 8 }}>
-                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#3b82f6" }}></div>
-                            <span>District-Scale Road Intelligence Live</span>
+                        <div className="glass-card" style={{ padding: "8px 16px", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: 8, background: "rgba(15, 23, 42, 0.9)" }}>
+                            <div className="pulse-ring-static" style={{ width: 10, height: 10, borderRadius: "50%", background: "#3b82f6" }}></div>
+                            <span style={{ fontWeight: 600 }}>RCOEM Ground Intelligence Active</span>
                         </div>
                     </div>
                 </div>
@@ -313,10 +327,30 @@ export default function RoutesPage() {
             <style jsx global>{`
                 .active-route {
                     border-color: var(--accent-teal) !important;
-                    box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
+                    box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
                 }
-                .leaflet-container {
-                    filter: grayscale(0.2) contrast(1.1);
+                .pulse-ring {
+                    position: absolute;
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid;
+                    border-radius: 50%;
+                    top: -8px;
+                    left: -8px;
+                    animation: pulse 2s infinite;
+                }
+                @keyframes pulse {
+                    0% { transform: scale(0.5); opacity: 1; }
+                    100% { transform: scale(2.5); opacity: 0; }
+                }
+                .pulse-ring-static {
+                    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                    animation: pulse-blue 2s infinite;
+                }
+                @keyframes pulse-blue {
+                    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+                    70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
                 }
             `}</style>
         </div>

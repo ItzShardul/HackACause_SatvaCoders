@@ -19,6 +19,8 @@ const demoRequests = [
     { id: 3, village_name: "Kamptee", district: "Nagpur", requested_by: "Sarpanch Wankhede", urgency: "critical", quantity_needed: 20000, reason: "Acute drinking water shortage in Ward 4", status: "pending", created_at: "2026-02-22T06:15:00" },
     { id: 4, village_name: "Umred", district: "Nagpur", requested_by: "Sarpanch More", urgency: "medium", quantity_needed: 10000, reason: "Routine supply disruption", status: "scheduled", created_at: "2026-02-20T10:00:00" },
     { id: 5, village_name: "Parseoni", district: "Nagpur", requested_by: "Sarpanch Gadkari", urgency: "high", quantity_needed: 15000, reason: "Temple feast gathering excess need", status: "completed", created_at: "2026-02-18T09:30:00" },
+    { id: 6, village_name: "Bhiwapur", district: "Nagpur", requested_by: "Sarpanch Meshram", urgency: "critical", quantity_needed: 30000, reason: "Groundwater level dropped drastically this week", status: "pending", created_at: "2026-02-23T05:00:00" },
+    { id: 7, village_name: "Narkhed", district: "Nagpur", requested_by: "Sarpanch Thakre", urgency: "high", quantity_needed: 12000, reason: "Citrus belt irrigation fallback required", status: "pending", created_at: "2026-02-23T09:45:00" },
 ];
 
 export default function RequestsPage() {

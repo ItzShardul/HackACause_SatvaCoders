@@ -1,59 +1,37 @@
 """
 Seed data generator for JalMitra.
-Creates realistic Maharashtra Vidarbha region data for demo.
+Focused exclusively on Nagpur District and its 14 Talukas for the Smart Pilot.
 """
 import random
 import math
+import hashlib
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.models import (
     Village, Tanker, WaterStressRecord, RainfallData,
     GroundwaterData, Trip, WaterRequest, Prediction, User, Grievance
 )
-import hashlib
 
-# ─── Maharashtra Vidarbha Villages (Real coordinates) ───
+# ─── Nagpur District - 14 Talukas (Realistic coordinates) ───
 VILLAGES_DATA = [
-    # Amravati Division (Western Vidarbha) - High Stress
-    {"name": "Yavatmal", "district": "Yavatmal", "taluka": "Yavatmal", "lat": 20.3888, "lng": 78.1204, "pop": 120000, "rainfall": 900},
-    {"name": "Pusad", "district": "Yavatmal", "taluka": "Pusad", "lat": 19.9146, "lng": 77.5724, "pop": 52000, "rainfall": 880},
-    {"name": "Wani", "district": "Yavatmal", "taluka": "Wani", "lat": 20.0570, "lng": 78.9580, "pop": 38000, "rainfall": 920},
-    {"name": "Digras", "district": "Yavatmal", "taluka": "Digras", "lat": 20.1068, "lng": 77.7180, "pop": 28000, "rainfall": 850},
-    {"name": "Darwha", "district": "Yavatmal", "taluka": "Darwha", "lat": 20.3218, "lng": 77.7696, "pop": 31000, "rainfall": 860},
-    
-    {"name": "Washim", "district": "Washim", "taluka": "Washim", "lat": 20.1108, "lng": 77.1330, "pop": 58000, "rainfall": 820},
-    {"name": "Risod", "district": "Washim", "taluka": "Risod", "lat": 20.1008, "lng": 76.7666, "pop": 22000, "rainfall": 790},
-    {"name": "Mangrulpir", "district": "Washim", "taluka": "Mangrulpir", "lat": 20.3128, "lng": 77.3444, "pop": 18000, "rainfall": 810},
-    
-    {"name": "Akola", "district": "Akola", "taluka": "Akola", "lat": 20.7096, "lng": 77.0075, "pop": 140000, "rainfall": 780},
-    {"name": "Akot", "district": "Akola", "taluka": "Akot", "lat": 21.0981, "lng": 77.0536, "pop": 45000, "rainfall": 760},
-    {"name": "Balapur", "district": "Akola", "taluka": "Balapur", "lat": 20.6571, "lng": 76.7749, "pop": 25000, "rainfall": 750},
-    
-    {"name": "Buldhana", "district": "Buldhana", "taluka": "Buldhana", "lat": 20.5293, "lng": 76.1852, "pop": 62000, "rainfall": 850},
-    {"name": "Khamgaon", "district": "Buldhana", "taluka": "Khamgaon", "lat": 20.7079, "lng": 76.5707, "pop": 80000, "rainfall": 830},
-    {"name": "Malkapur", "district": "Buldhana", "taluka": "Malkapur", "lat": 20.8870, "lng": 76.2220, "pop": 35000, "rainfall": 840},
-    
-    {"name": "Amravati", "district": "Amravati", "taluka": "Amravati", "lat": 20.9320, "lng": 77.7523, "pop": 175000, "rainfall": 880},
-    {"name": "Achalpur", "district": "Amravati", "taluka": "Achalpur", "lat": 21.2572, "lng": 77.5097, "pop": 68000, "rainfall": 920},
-    {"name": "Daryapur", "district": "Amravati", "taluka": "Daryapur", "lat": 20.9186, "lng": 77.3228, "pop": 28000, "rainfall": 820},
-    
-    # Nagpur Division (Eastern Vidarbha) - Moderate/Low Stress
-    {"name": "Wardha", "district": "Wardha", "taluka": "Wardha", "lat": 20.7453, "lng": 78.6022, "pop": 55000, "rainfall": 1050},
-    {"name": "Hinganghat", "district": "Wardha", "taluka": "Hinganghat", "lat": 20.3667, "lng": 78.8333, "pop": 42000, "rainfall": 1020},
-    
-    {"name": "Nagpur", "district": "Nagpur", "taluka": "Nagpur", "lat": 21.1458, "lng": 79.0882, "pop": 250000, "rainfall": 1100},
-    {"name": "Ramtek", "district": "Nagpur", "taluka": "Ramtek", "lat": 21.3938, "lng": 79.3275, "pop": 22000, "rainfall": 1150},
-    
-    {"name": "Chandrapur", "district": "Chandrapur", "taluka": "Chandrapur", "lat": 19.9615, "lng": 79.2961, "pop": 95000, "rainfall": 1200},
-    {"name": "Ballarpur", "district": "Chandrapur", "taluka": "Ballarpur", "lat": 19.8500, "lng": 79.3333, "pop": 30000, "rainfall": 1180},
-    
-    {"name": "Bhandara", "district": "Bhandara", "taluka": "Bhandara", "lat": 21.1667, "lng": 79.6500, "pop": 48000, "rainfall": 1250},
-    {"name": "Gondia", "district": "Gondia", "taluka": "Gondia", "lat": 21.4631, "lng": 80.1953, "pop": 42000, "rainfall": 1300},
-    {"name": "Gadchiroli", "district": "Gadchiroli", "taluka": "Gadchiroli", "lat": 20.1809, "lng": 80.0005, "pop": 28000, "rainfall": 1400},
+    {"name": "Nagpur Urban", "district": "Nagpur", "taluka": "Nagpur Urban", "lat": 21.1458, "lng": 79.0882, "pop": 2500000, "rainfall": 1100},
+    {"name": "Nagpur Rural", "district": "Nagpur", "taluka": "Nagpur Rural", "lat": 21.1000, "lng": 79.0500, "pop": 650000, "rainfall": 1080},
+    {"name": "Kamptee", "district": "Nagpur", "taluka": "Kamptee", "lat": 21.2227, "lng": 79.2014, "pop": 84300, "rainfall": 1120},
+    {"name": "Hingna", "district": "Nagpur", "taluka": "Hingna", "lat": 21.0667, "lng": 78.9667, "pop": 24600, "rainfall": 1050},
+    {"name": "Katol", "district": "Nagpur", "taluka": "Katol", "lat": 21.2682, "lng": 78.5833, "pop": 42100, "rainfall": 980},
+    {"name": "Narkhed", "district": "Nagpur", "taluka": "Narkhed", "lat": 21.4667, "lng": 78.5333, "pop": 21500, "rainfall": 950},
+    {"name": "Savner", "district": "Nagpur", "taluka": "Savner", "lat": 21.3917, "lng": 78.9167, "pop": 31200, "rainfall": 1020},
+    {"name": "Kalmeshwar", "district": "Nagpur", "taluka": "Kalmeshwar", "lat": 21.2333, "lng": 78.9167, "pop": 18200, "rainfall": 1040},
+    {"name": "Ramtek", "district": "Nagpur", "taluka": "Ramtek", "lat": 21.3938, "lng": 79.3275, "pop": 22400, "rainfall": 1150},
+    {"name": "Parseoni", "district": "Nagpur", "taluka": "Parseoni", "lat": 21.3833, "lng": 79.1667, "pop": 15300, "rainfall": 1100},
+    {"name": "Mauda", "district": "Nagpur", "taluka": "Mauda", "lat": 21.1667, "lng": 79.4333, "pop": 12500, "rainfall": 1200},
+    {"name": "Umred", "district": "Nagpur", "taluka": "Umred", "lat": 20.8500, "lng": 79.3333, "pop": 45600, "rainfall": 1180},
+    {"name": "Kuhi", "district": "Nagpur", "taluka": "Kuhi", "lat": 21.0167, "lng": 79.3667, "pop": 11200, "rainfall": 1250},
+    {"name": "Bhiwapur", "district": "Nagpur", "taluka": "Bhiwapur", "lat": 20.7667, "lng": 79.5167, "pop": 14200, "rainfall": 1300},
 ]
 
 WATER_SOURCES = ["Borewell", "Open Well", "River", "Reservoir", "Canal", "Handpump"]
-TANKER_PREFIXES = ["MH-29", "MH-30", "MH-31", "MH-32", "MH-33", "MH-34", "MH-35", "MH-36", "MH-37", "MH-38", "MH-39", "MH-40", "MH-49"]
+TANKER_PREFIXES = ["MH-31", "MH-40", "MH-49"] # Nagpur specific registration prefixes
 
 
 def get_severity(wsi: float) -> str:
@@ -69,21 +47,21 @@ def get_severity(wsi: float) -> str:
 
 
 def seed_database(db: Session):
-    """Seed the database with realistic demo data for Vidarbha."""
+    """Seed the database with realistic demo data for Nagpur Pilot."""
 
     # Check if already seeded
     if db.query(Village).count() > 0:
         print("Database already seeded. Skipping.")
         return
 
-    print("🌱 Seeding JalMitra database with Vidarbha data...")
+    print("🌱 Seeding JalMitra database with Nagpur Pilot data...")
 
     # ─── 1. Create Villages ───
     villages = []
     for v in VILLAGES_DATA:
         village = Village(
             name=v["name"],
-            district=v["district"],
+            district="Nagpur",
             taluka=v["taluka"],
             state="Maharashtra",
             latitude=v["lat"],
@@ -98,22 +76,22 @@ def seed_database(db: Session):
         db.add(village)
         villages.append(village)
     db.flush()
-    print(f"  ✅ Created {len(villages)} Vidarbha villages")
+    print(f"  ✅ Created {len(villages)} Nagpur taluka units")
 
     # ─── 2. Create Users ───
-    # District Collector (Yavatmal - Highest Stress)
+    # District Collector (Nagpur Admin)
     collector = User(
-        name="Amol Deshmukh",
-        email="collector@jalmitra.gov.in",
+        name="Nagpur Admin",
+        email="collector.nagpur@jalmitra.gov.in",
         password_hash=hashlib.sha256("admin123".encode()).hexdigest(),
         role="collector",
         phone="9876543210",
-        district="Yavatmal",
+        district="Nagpur",
     )
     db.add(collector)
 
-    # Gram Panchayat users (one per village for first 10 villages)
-    for i, v in enumerate(villages[:10]):
+    # Gram Panchayat users (one per taluka village)
+    for i, v in enumerate(villages):
         gp_user = User(
             name=f"Sarpanch {v.name}",
             email=f"gp.{v.name.lower().replace(' ', '')}@jalmitra.gov.in",
@@ -121,40 +99,33 @@ def seed_database(db: Session):
             role="gram_panchayat",
             phone=f"98765{43210 + i}",
             village_id=v.id,
-            district=v.district,
+            district="Nagpur",
         )
         db.add(gp_user)
     db.flush()
-    print("  ✅ Created users for Vidarbha districts")
+    print("  ✅ Created administrative users for Nagpur Pilot")
 
     # ─── 3. Create Tankers ───
     tankers = []
-    depots = [
-        {"lat": 20.3888, "lng": 78.1204, "district": "Yavatmal"},
-        {"lat": 20.7096, "lng": 77.0075, "district": "Akola"},
-        {"lat": 20.1108, "lng": 77.1330, "district": "Washim"},
-        {"lat": 20.5293, "lng": 76.1852, "district": "Buldhana"},
-        {"lat": 20.9320, "lng": 77.7523, "district": "Amravati"},
-        {"lat": 21.1458, "lng": 79.0882, "district": "Nagpur"},
-    ]
-    for i in range(25):
-        depot = depots[i % len(depots)]
+    # Major depot in Nagpur City
+    depot_lat, depot_lng = 21.1458, 79.0882
+    for i in range(20):
         tanker = Tanker(
-            registration_number=f"{random.choice(TANKER_PREFIXES)}-{random.choice('ABCDEFGH')}{random.choice('ABCDEFGH')}-{random.randint(1000, 9999)}",
+            registration_number=f"{random.choice(TANKER_PREFIXES)}-TR-{random.randint(1000, 9999)}",
             capacity_liters=random.choice([10000, 12000, 15000, 20000]),
-            driver_name=f"Driver {random.choice(['Sanjay', 'Rajesh', 'Vilas', 'Sunil', 'Anil', 'Nitin', 'Vijay', 'Pramod'])} {random.choice(['Wankhede', 'Thakre', 'Gawai', 'Raut', 'Mankar', 'Meshram', 'Bawankule'])}",
-            driver_phone=f"91{random.randint(10000000, 99999999)}",
+            driver_name=f"Driver {random.choice(['Sachin', 'Vijay', 'Amol', 'Rahul', 'Sanjay', 'Santosh'])} {random.choice(['Tayade', 'Deshmukh', 'Patil', 'Wankhede', 'Gondane', 'Patil'])}",
+            driver_phone="8459468626", # Using consistent demo phone
             status=random.choice(["available"] * 8 + ["on_trip"] * 5 + ["maintenance"]),
-            current_latitude=depot["lat"] + random.uniform(-0.1, 0.1),
-            current_longitude=depot["lng"] + random.uniform(-0.1, 0.1),
-            depot_latitude=depot["lat"],
-            depot_longitude=depot["lng"],
-            district=depot["district"],
+            current_latitude=depot_lat + random.uniform(-0.05, 0.05),
+            current_longitude=depot_lng + random.uniform(-0.05, 0.05),
+            depot_latitude=depot_lat,
+            depot_longitude=depot_lng,
+            district="Nagpur",
         )
         db.add(tanker)
         tankers.append(tanker)
     db.flush()
-    print(f"  ✅ Created {len(tankers)} tankers for Vidarbha")
+    print(f"  ✅ Created {len(tankers)} tankers for Nagpur Fleet")
 
     # ─── 4. Create Rainfall Data (24 months) ───
     base_date = datetime(2024, 3, 1)
@@ -162,23 +133,22 @@ def seed_database(db: Session):
         for month_offset in range(24):
             date = base_date + timedelta(days=month_offset * 30)
             month = date.month
-            # Monsoon pattern: June-Sept high, rest low
             if month in [6, 7, 8, 9]:
-                normal = village.avg_annual_rainfall_mm * 0.22  # 22% per monsoon month
+                normal = village.avg_annual_rainfall_mm * 0.22 
             elif month in [10, 11]:
                 normal = village.avg_annual_rainfall_mm * 0.05
             else:
                 normal = village.avg_annual_rainfall_mm * 0.02
 
-            # Add drought pattern for 2025 especially in West Vidarbha
+            # Simulate deficit in Katol/Narkhed (Citrus belt)
             drought_factor = 1.0
             if date.year == 2025 and month in [6, 7, 8, 9]:
-                if village.district in ["Yavatmal", "Washim", "Akola", "Buldhana"]:
-                    drought_factor = random.uniform(0.3, 0.6)  # 40-70% deficit
+                if village.taluka in ["Katol", "Narkhed", "Bhiwapur"]:
+                    drought_factor = random.uniform(0.4, 0.6)
                 else:
-                    drought_factor = random.uniform(0.7, 0.9)  # 10-30% deficit
+                    drought_factor = random.uniform(0.7, 0.9)
 
-            actual = normal * drought_factor * random.uniform(0.6, 1.4)
+            actual = normal * drought_factor * random.uniform(0.8, 1.2)
             deviation = ((actual - normal) / normal * 100) if normal > 0 else 0
 
             db.add(RainfallData(
@@ -190,23 +160,20 @@ def seed_database(db: Session):
             ))
 
     db.flush()
-    print("  ✅ Created rainfall data with Vidarbha drought patterns")
+    print("  ✅ Created rainfall data with Nagpur-specific trends")
 
     # ─── 5. Create Groundwater Data (24 months) ───
     for village in villages:
-        # West Vidarbha has deeper groundwater
-        base_level = random.uniform(12, 22) if village.district in ["Yavatmal", "Washim", "Akola"] else random.uniform(6, 14)
+        base_level = random.uniform(10, 18) if village.taluka in ["Katol", "Narkhed"] else random.uniform(5, 12)
         for month_offset in range(24):
             date = base_date + timedelta(days=month_offset * 30)
             month = date.month
-            # Groundwater rises during monsoon, drops otherwise
-            seasonal_change = -0.4 if month in [1, 2, 3, 4, 5, 12] else 0.3 if month in [7, 8, 9] else -0.1
-            # Declining trend in 2025
+            seasonal_change = -0.5 if month in [3, 4, 5] else 0.4 if month in [7, 8, 9] else -0.1
             if date.year == 2025:
-                seasonal_change -= 0.3
+                seasonal_change -= 0.2
 
-            base_level += seasonal_change + random.uniform(-0.2, 0.2)
-            base_level = max(3, min(40, base_level))
+            base_level += seasonal_change + random.uniform(-0.1, 0.1)
+            base_level = max(2, min(45, base_level))
 
             db.add(GroundwaterData(
                 village_id=village.id,
@@ -215,21 +182,20 @@ def seed_database(db: Session):
                 change_from_previous=round(seasonal_change, 2),
             ))
     db.flush()
-    print("  ✅ Created groundwater data for Vidarbha hydrogeology")
+    print("  ✅ Created groundwater data for Nagpur hydrogeology")
 
-    # ─── 6. Create WSI Records (current + historical) ───
+    # ─── 6. Create WSI Records ───
     for village in villages:
-        # Calculate stress based on region
-        if village.district in ["Yavatmal", "Washim", "Akola"]:
-            rainfall_dev = random.uniform(-65, -30)
-            gw_decline = random.uniform(30, 80)
-            demand_hist = random.uniform(60, 95)
+        if village.taluka in ["Katol", "Narkhed", "Bhiwapur", "Umred"]:
+            rainfall_dev = random.uniform(-55, -30)
+            gw_decline = random.uniform(35, 75)
+            demand_hist = random.uniform(65, 90)
         else:
-            rainfall_dev = random.uniform(-20, 10)
-            gw_decline = random.uniform(5, 30)
-            demand_hist = random.uniform(10, 40)
+            rainfall_dev = random.uniform(-15, 5)
+            gw_decline = random.uniform(5, 25)
+            demand_hist = random.uniform(5, 30)
             
-        pop_factor = min(village.population / 150000, 1.0) * 100
+        pop_factor = min(village.population / 100000, 1.0) * 100
 
         wsi = (
             abs(rainfall_dev) * 0.35 +
@@ -259,66 +225,49 @@ def seed_database(db: Session):
             },
         ))
     db.flush()
-    print("  ✅ Created regionalized WSI records")
+    print("  ✅ Created WSI records for Nagpur Pilot")
 
-    # ─── 7. Create Trips (recent) ───
-    statuses = ["delivered"] * 20 + ["in_transit"] * 5 + ["assigned"] * 10
-    for i in range(35):
-        status = random.choice(statuses)
-        scheduled = datetime.utcnow() - timedelta(days=random.randint(0, 14))
-        trip = Trip(
+    # ─── 7. Create Recent Activity ───
+    for i in range(20):
+        village = random.choice(villages)
+        status = random.choice(["delivered", "in_transit", "assigned"])
+        scheduled = datetime.utcnow() - timedelta(days=random.randint(0, 5))
+        db.add(Trip(
             tanker_id=random.choice(tankers).id,
-            village_id=random.choice(villages[:15]).id, # Mostly stressed villages
+            village_id=village.id,
             status=status,
             quantity_liters=random.choice([10000, 12000, 15000]),
-            priority_score=round(random.uniform(40, 95), 1),
+            priority_score=round(random.uniform(50, 98), 1),
             scheduled_at=scheduled,
             started_at=scheduled + timedelta(hours=1) if status != "assigned" else None,
             completed_at=scheduled + timedelta(hours=3) if status == "delivered" else None,
-            route_distance_km=round(random.uniform(15, 100), 1),
-            route_duration_min=round(random.uniform(45, 180), 0),
-        )
-        db.add(trip)
-    db.flush()
-    print("  ✅ Created active tanker trips in Vidarbha")
-
-    # ─── 8. Create Water Requests ───
-    reasons = [
-        "Borewells in farmer suicides belt dried up",
-        "No rainy spells for 40 days",
-        "Severe drinking water shortage in tribal pockets",
-        "Lakes in Amravati division at dead storage",
-        "Village wells depleted due to extreme heat",
-        "Cotton belt water scarcity",
-    ]
-    for i in range(20):
+            route_distance_km=round(random.uniform(10, 60), 1),
+            route_duration_min=round(random.uniform(30, 120), 0),
+        ))
+    
+    # Water Requests
+    for i in range(12):
         village = random.choice(villages)
         db.add(WaterRequest(
             village_id=village.id,
             requested_by=f"Sarpanch {village.name}",
-            phone=f"98{random.randint(10000000, 99999999)}",
-            urgency=random.choice(["medium", "high", "critical", "critical"]),
-            quantity_needed_liters=random.choice([10000, 15000, 20000, 30000]),
-            reason=random.choice(reasons),
-            status=random.choice(["pending"] * 6 + ["approved"] * 4 + ["scheduled"] * 4 + ["completed"] * 6),
-            created_at=datetime.utcnow() - timedelta(days=random.randint(0, 7)),
+            phone="8459468626",
+            urgency=random.choice(["high", "critical", "critical"]),
+            quantity_needed_liters=random.choice([10000, 15000, 20000]),
+            reason="Citrus belt drying up. Immediate tanker support required for human consumption.",
+            status=random.choice(["pending", "approved", "scheduled", "completed"]),
+            created_at=datetime.utcnow() - timedelta(days=random.randint(0, 3)),
         ))
-    db.flush()
-    print("  ✅ Created urgent water requests")
 
-    # ─── 9. Create Predictions (30/60/90 days) ───
+    # ─── 8. Create Predictions (30/60/90 days) ───
     for village in villages:
-        current_wsi = db.query(WaterStressRecord).filter(
-            WaterStressRecord.village_id == village.id
-        ).order_by(WaterStressRecord.date.desc()).first()
-
-        base_wsi = current_wsi.wsi_score if current_wsi else 50
+        current_wsi_rec = db.query(WaterStressRecord).filter(WaterStressRecord.village_id == village.id).first()
+        base_wsi = current_wsi_rec.wsi_score if current_wsi_rec else 50
 
         for days_ahead in [30, 60, 90]:
-            # Stressed districts predict worse outcomes
-            trend = random.uniform(2, 12) if village.district in ["Yavatmal", "Washim"] else random.uniform(-2, 5)
+            trend = random.uniform(4, 15) if village.taluka in ["Katol", "Narkhed", "Bhiwapur"] else random.uniform(-1, 6)
             predicted_wsi = min(100, max(0, base_wsi + trend))
-            predicted_demand = int(village.population * predicted_wsi / 100 * 0.4)
+            predicted_demand = int(village.population * predicted_wsi / 100 * 0.35)
             db.add(Prediction(
                 village_id=village.id,
                 prediction_date=datetime.utcnow(),
@@ -327,30 +276,22 @@ def seed_database(db: Session):
                 predicted_severity=get_severity(predicted_wsi),
                 predicted_demand_liters=predicted_demand,
                 predicted_tanker_trips=max(1, predicted_demand // 12000),
-                confidence=round(random.uniform(0.75, 0.98), 2),
-                model_version="Vidarbha-V2.0",
+                confidence=round(random.uniform(0.82, 0.98), 2),
+                model_version="Nagpur-Pilot-V1.0",
             ))
-    db.flush()
-    print("  ✅ Created drought predictions for all Vidarbha districts")
 
-    # ─── 10. Create Grievances ───
-    for i in range(10):
+    # ─── 9. Create Grievances ───
+    for i in range(8):
         village = random.choice(villages)
         db.add(Grievance(
             village_id=village.id,
-            submitted_by=f"Worker from {village.name}",
-            phone=f"97{random.randint(10000000, 99999999)}",
-            category=random.choice(["delay", "quality", "quantity"]),
-            description=random.choice([
-                "Tanker delayed due to heatwave conditions",
-                "Delivered water quantity insufficient for cattle",
-                "Scheduled tanker did not arrive in 48 hours",
-                "Quality of water from local reservoir is poor",
-            ]),
+            submitted_by=f"Resident of {village.name}",
+            phone="8459468626",
+            category=random.choice(["delay", "quantity"]),
+            description="Tanker arrival delayed beyond 24 hours. Emergency water stock exhausted.",
             status=random.choice(["open", "in_progress", "resolved"]),
-            created_at=datetime.utcnow() - timedelta(days=random.randint(0, 10)),
+            created_at=datetime.utcnow() - timedelta(days=random.randint(0, 5)),
         ))
 
     db.commit()
-    print("  ✅ Created localized grievances")
-    print("🎉 Database seeding with Vidarbha data complete!")
+    print("🎉 Database successfully seeded for Nagpur District Pilot!")

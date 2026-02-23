@@ -40,6 +40,9 @@ export const api = {
         if (district) params.set("district", district);
         return fetchAPI(`/api/routes/optimize?${params}`, { method: "POST" });
     },
+    getRoute: (start: [number, number], end: [number, number]) =>
+        fetchAPI(`/api/routes/calculate?start_lat=${start[0]}&start_lon=${start[1]}&end_lat=${end[0]}&end_lon=${end[1]}`),
+
 
     // Simulation
     simulate: (rainfallChangePct: number) =>

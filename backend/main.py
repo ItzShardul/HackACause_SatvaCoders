@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from app.database import engine, Base, SessionLocal
 from app.routes import router
 from app.weather_routes import weather_router
+from app.route_routes import router as route_router
 from app.seed_data import seed_database
 from app.websocket import manager
 from app.scheduler import start_scheduler, stop_scheduler, initial_data_load
@@ -55,6 +56,7 @@ app.add_middleware(
 # Routes
 app.include_router(router)
 app.include_router(weather_router)
+app.include_router(route_router)
 
 
 @app.get("/")

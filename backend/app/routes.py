@@ -314,7 +314,9 @@ def optimize_tanker_routes(
                 "priority": p["priority_score"],
             })
 
-    return optimize_routes(depot, villages_for_routing, num_vehicles)
+    result = optimize_routes(depot, villages_for_routing, num_vehicles)
+    result["depot"] = depot
+    return result
 
 
 # ═══════════════════════════════════════════

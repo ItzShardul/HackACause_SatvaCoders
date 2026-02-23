@@ -1,0 +1,42 @@
+# Node
+node_modules/
+.next/
+out/
+build/
+.vercel
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.local
+.env.*.local
+jalmitra.db
+*.sqlite3
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# JalMitra specific
+backend/data/*.csv
+!backend/data/villages.csv
+!backend/data/rainfall.csv
+!backend/data/groundwater.csv
+!backend/data/tankers.csv

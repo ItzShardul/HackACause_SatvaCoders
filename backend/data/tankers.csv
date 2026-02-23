@@ -1,0 +1,11 @@
+registration,capacity_liters,driver_name,driver_phone,status,base_district
+MH-32-AB-1234,15000,Suresh Patil,9712345678,available,Yavatmal
+MH-32-CD-5678,10000,Ramesh Jadhav,9787654321,available,Yavatmal
+MH-26-EF-9012,12000,Ganesh Pawar,9756789012,available,Akola
+MH-26-GH-3456,15000,Mahesh More,9734567890,on_trip,Akola
+MH-27-IJ-7890,10000,Dinesh Shinde,9723456789,available,Washim
+MH-27-KL-2345,8000,Prakash Desai,9712345670,maintenance,Washim
+MH-28-MN-6789,15000,Vijay Kulkarni,9745678901,available,Buldhana
+MH-28-OP-1234,12000,Arun Thakare,9756789023,available,Buldhana
+MH-30-QR-5678,10000,Sanjay Gawai,9767890134,on_trip,Amravati
+MH-30-ST-9012,15000,Nilesh Wankhade,9778901245,available,Amravati
